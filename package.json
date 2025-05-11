@@ -1,0 +1,26 @@
+{
+  "name": "erp-college-app",
+  "version": "1.0.0",
+  "description": "College ERP system with Node.js, Express, EJS, MongoDB",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["erp", "college", "student", "faculty", "nodejs", "express", "ejs", "mongodb"],
+  "author": "YourName",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "connect-flash": "^0.1.1",
+    "connect-mongo": "^5.0.0",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.19.2",
+    "express-session": "^1.17.4",
+    "mongoose": "^7.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
