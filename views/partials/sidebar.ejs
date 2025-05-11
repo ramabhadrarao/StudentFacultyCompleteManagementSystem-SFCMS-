@@ -1,0 +1,95 @@
+<!-- views/partials/sidebar.ejs -->
+<div class="navbar-expand-md">
+  <div class="collapse navbar-collapse" id="navbar-menu">
+    <div class="navbar navbar-light">
+      <div class="container-xl">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard">
+              <span class="nav-link-icon d-md-none d-lg-inline-block">
+                <i class="ti ti-home"></i>
+              </span>
+              <span class="nav-link-title">
+                Dashboard
+              </span>
+            </a>
+          </li>
+          
+          <% if (user && (user.role === 'admin' || user.role === 'principal' || user.role === 'hod')) { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-users"></i>
+                </span>
+                <span class="nav-link-title">
+                  People
+                </span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="/faculty">
+                  Faculty
+                </a>
+                <a class="dropdown-item" href="/students">
+                  Students
+                </a>
+              </div>
+            </li>
+          <% } %>
+          
+          <% if (user && (user.role === 'admin' || user.role === 'faculty' || user.role === 'hod')) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/attendance">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-calendar"></i>
+                </span>
+                <span class="nav-link-title">
+                  Attendance
+                </span>
+              </a>
+            </li>
+          <% } %>
+          
+          <% if (user && user.role === 'student') { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/my-attendance">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-calendar"></i>
+                </span>
+                <span class="nav-link-title">
+                  My Attendance
+                </span>
+              </a>
+            </li>
+          <% } %>
+          
+          <% if (user && (user.role === 'admin' || user.role === 'principal')) { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#navbar-extra" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-building"></i>
+                </span>
+                <span class="nav-link-title">
+                  Administration
+                </span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="/departments">
+                  Departments
+                </a>
+                <a class="dropdown-item" href="/programs">
+                  Programs
+                </a>
+                <a class="dropdown-item" href="/courses">
+                  Courses
+                </a>
+                <a class="dropdown-item" href="/batches">
+                  Batches
+                </a>
+              </div>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

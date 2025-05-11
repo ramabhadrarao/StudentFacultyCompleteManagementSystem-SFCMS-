@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - College ERP</title>
+  <link href="https://unpkg.com/@tabler/core@latest/dist/css/tabler.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.20.0/tabler-icons.min.css">
+  <link href="/css/style.css" rel="stylesheet">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="page">
+    <!-- Header -->
+    <header class="navbar navbar-expand-md navbar-light d-print-none">
+      <div class="container-xl">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+          <a href="/dashboard">
+            <img src="https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_clr_74x24px.svg" width="110" height="32" alt="SFCMS" class="navbar-brand-image">
+          </a>
+        </h1>
+        <div class="navbar-nav flex-row order-md-last">
+          <div class="d-none d-md-flex me-3">
+            <a href="?theme=dark" class="nav-link px-0 hide-theme-dark" title="Enable dark mode" data-bs-toggle="tooltip" data-bs-placement="bottom">
+              <i class="ti ti-moon"></i>
+            </a>
+            <a href="?theme=light" class="nav-link px-0 hide-theme-light" title="Enable light mode" data-bs-toggle="tooltip" data-bs-placement="bottom">
+              <i class="ti ti-sun"></i>
+            </a>
+          </div>
+          <div class="nav-item dropdown">
+            <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
+              <span class="avatar avatar-sm" style="background-color: #206bc4">
+                <%= user.username.charAt(0).toUpperCase() %>
+              </span>
+              <div class="d-none d-xl-block ps-2">
+                <div><%= user ? user.username : 'Guest' %></div>
+                <div class="mt-1 small text-muted"><%= user ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '' %></div>
+              </div>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+              <a href="/profile" class="dropdown-item">
+                <i class="ti ti-user me-1"></i>
+                Profile
+              </a>
+              <a href="/settings" class="dropdown-item">
+                <i class="ti ti-settings me-1"></i>
+                Settings
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="/logout" class="dropdown-item">
+                <i class="ti ti-logout me-1"></i>
+                Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Navbar -->
+    <div class="navbar-expand-md">
+      <div class="collapse navbar-collapse" id="navbar-menu">
+        <div class="navbar navbar-light">
+          <div class="container-xl">
+            <ul class="navbar-nav">
+              <li class="nav-item active">
+                <a class="nav-link" href="/dashboard">
+                  <span class="nav-link-icon d-md-none d-lg-inline-block">
+                    <i class="ti ti-home"></i>
+                  </span>
+                  <span class="nav-link-title">
+                    Dashboard
+                  </span>
+                </a>
+              </li>
+              
+              <% if (user && (user.role === 'admin' || user.role === 'hod' || user.role === 'principal')) { %>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#navbar-staff" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <i class="ti ti-users"></i>
+                    </span>
+                    <span class="nav-link-title">
+                      Staff
+                    </span>
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/faculty">
+                      <i class="ti ti-user me-1"></i>
+                      Faculty List
+                    </a>
+                    <a class="dropdown-item" href="/faculty/new">
+                      <i class="ti ti-user-plus me-1"></i>
+                      Add Faculty
+                    </a>
+                  </div>
+                </li>
+                
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#navbar-students" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <i class="ti ti-building-bank"></i>
+                    </span>
+                    <span class="nav-link-title">
+                      Students
+                    </span>
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/students">
+                      <i class="ti ti-users me-1"></i>
+                      Student List
+                    </a>
+                    <a class="dropdown-item" href="/students/new">
+                      <i class="ti ti-user-plus me-1"></i>
+                      Add Student
+                    </a>
+                    <a class="dropdown-item" href="/batches">
+                      <i class="ti ti-brand-tableau me-1"></i>
+                      Batches
+                    </a>
+                  </div>
+                </li>
+              <% } %>
+              
+              <% if (user && (user.role === 'faculty' || user.role === 'hod')) { %>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#navbar-attendance" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <i class="ti ti-calendar"></i>
+                    </span>
+                    <span class="nav-link-title">
+                      Attendance
+                    </span>
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/attendance/mark">
+                      <i class="ti ti-checklist me-1"></i>
+                      Mark Attendance
+                    </a>
+                    <a class="dropdown-item" href="/attendance/report">
+                      <i class="ti ti-file-analytics me-1"></i>
+                      Attendance Reports
+                    </a>
+                  </div>
+                </li>
+              <% } %>
+              
+              <% if (user && user.role === 'student') { %>
+                <li class="nav-item">
+                  <a class="nav-link" href="/my-attendance">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <i class="ti ti-calendar-stats"></i>
+                    </span>
+                    <span class="nav-link-title">
+                      My Attendance
+                    </span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/my-courses">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <i class="ti ti-books"></i>
+                    </span>
+                    <span class="nav-link-title">
+                      My Courses
+                    </span>
+                  </a>
+                </li>
+              <% } %>
+              
+              <% if (user && user.role === 'admin') { %>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#navbar-academics" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <i class="ti ti-building"></i>
+                    </span>
+                    <span class="nav-link-title">
+                      Academics
+                    </span>
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/departments">
+                      <i class="ti ti-building me-1"></i>
+                      Departments
+                    </a>
+                    <a class="dropdown-item" href="/programs">
+                      <i class="ti ti-certificate me-1"></i>
+                      Programs
+                    </a>
+                    <a class="dropdown-item" href="/courses">
+                      <i class="ti ti-book me-1"></i>
+                      Courses
+                    </a>
+                  </div>
+                </li>
+                
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#navbar-settings" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <i class="ti ti-settings"></i>
+                    </span>
+                    <span class="nav-link-title">
+                      System
+                    </span>
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/users">
+                      <i class="ti ti-users me-1"></i>
+                      Users
+                    </a>
+                    <a class="dropdown-item" href="/settings/system">
+                      <i class="ti ti-adjustments me-1"></i>
+                      System Settings
+                    </a>
+                  </div>
+                </li>
+              <% } %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Page wrapper -->
+    <div class="page-wrapper">
+      <!-- Page header -->
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="row g-2 align-items-center">
+            <div class="col">
+              <div class="page-pretitle">
+                Overview
+              </div>
+              <h2 class="page-title">
+                Dashboard
+              </h2>
+            </div>
+            <div class="col-auto ms-auto">
+              <div class="btn-list">
+                <span class="d-none d-sm-inline">
+                  <a href="/help" class="btn">
+                    <i class="ti ti-help me-1"></i>
+                    Help
+                  </a>
+                </span>
+                <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-report">
+                  <i class="ti ti-file-report me-1"></i>
+                  Generate Report
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Page body -->
+      <div class="page-body">
+        <div class="container-xl">
+          <!-- Flash messages -->
+          <% if (locals.error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible" role="alert">
+              <div class="d-flex">
+                <div>
+                  <i class="ti ti-alert-circle me-2"></i>
+                </div>
+                <div>
+                  <%= error_msg %>
+                </div>
+              </div>
+              <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div>
+          <% } %>
+          
+          <% if (locals.success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success alert-dismissible" role="alert">
+              <div class="d-flex">
+                <div>
+                  <i class="ti ti-check me-2"></i>
+                </div>
+                <div>
+                  <%= success_msg %>
+                </div>
+              </div>
+              <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            </div>
+          <% } %>
+          
+          <!-- Stats row -->
+          <div class="row row-deck row-cards">
+            <!-- Welcome Card -->
+            <div class="col-12">
+              <div class="card card-md">
+                <div class="card-stamp card-stamp-lg">
+                  <div class="card-stamp-icon bg-primary">
+                    <i class="ti ti-user"></i>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="row align-items-center">
+                    <div class="col-10">
+                      <h3 class="h1">Welcome, <%= user.username %></h3>
+                      <div class="markdown text-muted">
+                        You are logged in as <strong><%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %></strong>. Use the navigation to access various features of the College ERP System.
+                      </div>
+                      <div class="mt-3">
+                        <a href="/profile" class="btn btn-primary">View Profile</a>
+                        <a href="/settings" class="btn btn-outline-primary ms-2">Settings</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Role-specific dashboard elements -->
+            <% if (user.role === 'admin') { %>
+              <!-- Admin Stats Cards -->
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Total Faculty</div>
+                      <div class="ms-auto lh-1">
+                        <div class="dropdown">
+                          <a class="dropdown-toggle text-muted" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Last 7 days</a>
+                          <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item active" href="#">Last 7 days</a>
+                            <a class="dropdown-item" href="#">Last 30 days</a>
+                            <a class="dropdown-item" href="#">Last 3 months</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">45</div>
+                      <div class="me-auto">
+                        <span class="text-green d-inline-flex align-items-center lh-1">
+                          <i class="ti ti-trending-up me-1"></i> 8.1%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Total Students</div>
+                      <div class="ms-auto lh-1">
+                        <div class="dropdown">
+                          <a class="dropdown-toggle text-muted" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Last 7 days</a>
+                          <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item active" href="#">Last 7 days</a>
+                            <a class="dropdown-item" href="#">Last 30 days</a>
+                            <a class="dropdown-item" href="#">Last 3 months</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">1,250</div>
+                      <div class="me-auto">
+                        <span class="text-green d-inline-flex align-items-center lh-1">
+                          <i class="ti ti-trending-up me-1"></i> 12.5%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Departments</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">8</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Active Programs</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">12</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Admin Recent Activities -->
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Recent Activities</h3>
+                  </div>
+                  <div class="list-group list-group-flush">
+                    <div class="list-group-item">
+                      <div class="row align-items-center">
+                        <div class="col-auto"><span class="status-dot status-dot-animated bg-green d-block"></span></div>
+                        <div class="col text-truncate">
+                          <a href="#" class="text-body d-block">New faculty onboarded: John Smith</a>
+                          <div class="d-block text-muted text-truncate mt-n1">Completed registration process for Department of Computer Science</div>
+                        </div>
+                        <div class="col-auto">
+                          <a href="#" class="list-group-item-actions">
+                            <i class="ti ti-eye"></i>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="list-group-item">
+                      <div class="row align-items-center">
+                        <div class="col-auto"><span class="status-dot d-block"></span></div>
+                        <div class="col text-truncate">
+                          <a href="#" class="text-body d-block">New program created: B.Tech in Data Science</a>
+                          <div class="d-block text-muted text-truncate mt-n1">Added 32 courses to the new program curriculum</div>
+                        </div>
+                        <div class="col-auto">
+                          <a href="#" class="list-group-item-actions">
+                            <i class="ti ti-eye"></i>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="list-group-item">
+                      <div class="row align-items-center">
+                        <div class="col-auto"><span class="status-dot d-block"></span></div>
+                        <div class="col text-truncate">
+                          <a href="#" class="text-body d-block">Student batch created: 2025-29 CSE</a>
+                          <div class="d-block text-muted text-truncate mt-n1">Added 120 students to the new batch</div>
+                        </div>
+                        <div class="col-auto">
+                          <a href="#" class="list-group-item-actions">
+                            <i class="ti ti-eye"></i>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+            
+            <% if (user.role === 'faculty') { %>
+              <!-- Faculty-specific cards -->
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">My Courses</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">5</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Today's Classes</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">3</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Pending Tasks</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">7</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Average Attendance</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">82%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Faculty timetable -->
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Today's Schedule</h3>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table card-table table-vcenter">
+                      <thead>
+                        <tr>
+                          <th>Time</th>
+                          <th>Course</th>
+                          <th>Batch</th>
+                          <th>Room</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>09:00 - 10:00</td>
+                          <td>Data Structures</td>
+                          <td>B.Tech CSE 3rd Sem</td>
+                          <td>LH-201</td>
+                          <td>
+                            <a href="/attendance/mark" class="btn btn-sm btn-primary">Mark Attendance</a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>11:00 - 12:00</td>
+                          <td>Database Management</td>
+                          <td>B.Tech CSE 5th Sem</td>
+                          <td>LH-305</td>
+                          <td>
+                            <a href="/attendance/mark" class="btn btn-sm btn-primary">Mark Attendance</a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>14:00 - 16:00</td>
+                          <td>Computer Networks Lab</td>
+                          <td>B.Tech CSE 4th Sem</td>
+                          <td>Lab-102</td>
+                          <td>
+                            <a href="/attendance/mark" class="btn btn-sm btn-primary">Mark Attendance</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+            
+            <% if (user.role === 'student') { %>
+              <!-- Student-specific cards -->
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">My Courses</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">6</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Today's Classes</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">4</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Overall Attendance</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">89%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">CGPA</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2">8.5</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Student timetable -->
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Today's Schedule</h3>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table card-table table-vcenter">
+                      <thead>
+                        <tr>
+                          <th>Time</th>
+                          <th>Course</th>
+                          <th>Faculty</th>
+                          <th>Room</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>09:00 - 10:00</td>
+                          <td>Data Structures</td>
+                          <td>Prof. Johnson</td>
+                          <td>LH-201</td>
+                        </tr>
+                        <tr>
+                          <td>10:00 - 11:00</td>
+                          <td>Discrete Mathematics</td>
+                          <td>Prof. Williams</td>
+                          <td>LH-203</td>
+                        </tr>
+                        <tr>
+                          <td>12:00 - 13:00</td>
+                          <td>OOPS Using Java</td>
+                          <td>Prof. Davis</td>
+                          <td>LH-205</td>
+                        </tr>
+                        <tr>
+                          <td>14:00 - 16:00</td>
+                          <td>Digital Logic Lab</td>
+                          <td>Prof. Miller</td>
+                          <td>Lab-101</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Student attendance overview -->
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Attendance Overview</h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-6 col-lg-4">
+                        <div class="mb-3">
+                          <label class="form-label">Data Structures</label>
+                          <div class="progress mb-2">
+                            <div class="progress-bar bg-primary" style="width: 92%" role="progressbar" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100" aria-label="92% Complete">
+                              <span class="visually-hidden">92% Complete</span>
+                            </div>
+                          </div>
+                          <div class="text-muted">92% (22/24 classes attended)</div>
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-lg-4">
+                        <div class="mb-3">
+                          <label class="form-label">Discrete Mathematics</label>
+                          <div class="progress mb-2">
+                            <div class="progress-bar bg-primary" style="width: 88%" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100" aria-label="88% Complete">
+                              <span class="visually-hidden">88% Complete</span>
+                            </div>
+                          </div>
+                          <div class="text-muted">88% (21/24 classes attended)</div>
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-lg-4">
+                      <div class="mb-3">
+                         <label class="form-label">OOPS Using Java</label>
+                         <div class="progress mb-2">
+                           <div class="progress-bar bg-primary" style="width: 85%" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="85% Complete">
+                             <span class="visually-hidden">85% Complete</span>
+                           </div>
+                         </div>
+                         <div class="text-muted">85% (17/20 classes attended)</div>
+                       </div>
+                     </div>
+                     <div class="col-md-6 col-lg-4">
+                       <div class="mb-3">
+                         <label class="form-label">Computer Networks</label>
+                         <div class="progress mb-2">
+                           <div class="progress-bar bg-primary" style="width: 79%" role="progressbar" aria-valuenow="79" aria-valuemin="0" aria-valuemax="100" aria-label="79% Complete">
+                             <span class="visually-hidden">79% Complete</span>
+                           </div>
+                         </div>
+                         <div class="text-muted">79% (19/24 classes attended)</div>
+                       </div>
+                     </div>
+                     <div class="col-md-6 col-lg-4">
+                       <div class="mb-3">
+                         <label class="form-label">Database Management</label>
+                         <div class="progress mb-2">
+                           <div class="progress-bar bg-warning" style="width: 75%" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" aria-label="75% Complete">
+                             <span class="visually-hidden">75% Complete</span>
+                           </div>
+                         </div>
+                         <div class="text-muted">75% (18/24 classes attended)</div>
+                       </div>
+                     </div>
+                     <div class="col-md-6 col-lg-4">
+                       <div class="mb-3">
+                         <label class="form-label">Software Engineering</label>
+                         <div class="progress mb-2">
+                           <div class="progress-bar bg-danger" style="width: 67%" role="progressbar" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100" aria-label="67% Complete">
+                             <span class="visually-hidden">67% Complete</span>
+                           </div>
+                         </div>
+                         <div class="text-muted text-danger">67% (16/24 classes attended) - Below threshold</div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           <% } %>
+           
+           <% if (user.role === 'hod') { %>
+             <!-- HOD-specific cards -->
+             <div class="col-sm-6 col-lg-3">
+               <div class="card">
+                 <div class="card-body">
+                   <div class="d-flex align-items-center">
+                     <div class="subheader">Department Faculty</div>
+                   </div>
+                   <div class="d-flex align-items-baseline">
+                     <div class="h1 mb-0 me-2">18</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+             <div class="col-sm-6 col-lg-3">
+               <div class="card">
+                 <div class="card-body">
+                   <div class="d-flex align-items-center">
+                     <div class="subheader">Department Students</div>
+                   </div>
+                   <div class="d-flex align-items-baseline">
+                     <div class="h1 mb-0 me-2">450</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+             <div class="col-sm-6 col-lg-3">
+               <div class="card">
+                 <div class="card-body">
+                   <div class="d-flex align-items-center">
+                     <div class="subheader">Active Courses</div>
+                   </div>
+                   <div class="d-flex align-items-baseline">
+                     <div class="h1 mb-0 me-2">32</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+             <div class="col-sm-6 col-lg-3">
+               <div class="card">
+                 <div class="card-body">
+                   <div class="d-flex align-items-center">
+                     <div class="subheader">Pending Tasks</div>
+                   </div>
+                   <div class="d-flex align-items-baseline">
+                     <div class="h1 mb-0 me-2">5</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+             
+             <!-- HOD department performance -->
+             <div class="col-12">
+               <div class="card">
+                 <div class="card-header">
+                   <h3 class="card-title">Department Performance Overview</h3>
+                 </div>
+                 <div class="card-body">
+                   <h4>Average Attendance by Course</h4>
+                   <div class="row">
+                     <div class="col-md-6 col-lg-4">
+                       <div class="mb-3">
+                         <label class="form-label">Programming Fundamentals</label>
+                         <div class="progress mb-2">
+                           <div class="progress-bar bg-primary" style="width: 91%" role="progressbar" aria-valuenow="91" aria-valuemin="0" aria-valuemax="100">
+                             91%
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                     <div class="col-md-6 col-lg-4">
+                       <div class="mb-3">
+                         <label class="form-label">Data Structures</label>
+                         <div class="progress mb-2">
+                           <div class="progress-bar bg-primary" style="width: 88%" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100">
+                             88%
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                     <div class="col-md-6 col-lg-4">
+                       <div class="mb-3">
+                         <label class="form-label">Database Management</label>
+                         <div class="progress mb-2">
+                           <div class="progress-bar bg-primary" style="width: 83%" role="progressbar" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100">
+                             83%
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                   
+                   <h4 class="mt-4">Faculty Performance</h4>
+                   <div class="table-responsive">
+                     <table class="table table-vcenter card-table">
+                       <thead>
+                         <tr>
+                           <th>Faculty Name</th>
+                           <th>Courses</th>
+                           <th>Avg. Attendance</th>
+                           <th>Course Completion</th>
+                           <th>Actions</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                         <tr>
+                           <td>Prof. Johnson</td>
+                           <td>3</td>
+                           <td>
+                             <div class="text-success">92%</div>
+                           </td>
+                           <td>
+                             <div class="progress">
+                               <div class="progress-bar bg-primary" style="width: 65%">65%</div>
+                             </div>
+                           </td>
+                           <td>
+                             <a href="#" class="btn btn-sm btn-primary">View Details</a>
+                           </td>
+                         </tr>
+                         <tr>
+                           <td>Prof. Williams</td>
+                           <td>4</td>
+                           <td>
+                             <div class="text-success">87%</div>
+                           </td>
+                           <td>
+                             <div class="progress">
+                               <div class="progress-bar bg-primary" style="width: 72%">72%</div>
+                             </div>
+                           </td>
+                           <td>
+                             <a href="#" class="btn btn-sm btn-primary">View Details</a>
+                           </td>
+                         </tr>
+                         <tr>
+                           <td>Prof. Davis</td>
+                           <td>2</td>
+                           <td>
+                             <div class="text-warning">76%</div>
+                           </td>
+                           <td>
+                             <div class="progress">
+                               <div class="progress-bar bg-primary" style="width: 68%">68%</div>
+                             </div>
+                           </td>
+                           <td>
+                             <a href="#" class="btn btn-sm btn-primary">View Details</a>
+                           </td>
+                         </tr>
+                       </tbody>
+                     </table>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           <% } %>
+           
+           <% if (user.role === 'principal') { %>
+             <!-- Principal-specific cards -->
+             <div class="col-sm-6 col-lg-3">
+               <div class="card">
+                 <div class="card-body">
+                   <div class="d-flex align-items-center">
+                     <div class="subheader">Total Departments</div>
+                   </div>
+                   <div class="d-flex align-items-baseline">
+                     <div class="h1 mb-0 me-2">8</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+             <div class="col-sm-6 col-lg-3">
+               <div class="card">
+                 <div class="card-body">
+                   <div class="d-flex align-items-center">
+                     <div class="subheader">Total Faculty</div>
+                   </div>
+                   <div class="d-flex align-items-baseline">
+                     <div class="h1 mb-0 me-2">84</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+             <div class="col-sm-6 col-lg-3">
+               <div class="card">
+                 <div class="card-body">
+                   <div class="d-flex align-items-center">
+                     <div class="subheader">Total Students</div>
+                   </div>
+                   <div class="d-flex align-items-baseline">
+                     <div class="h1 mb-0 me-2">2,450</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+             <div class="col-sm-6 col-lg-3">
+               <div class="card">
+                 <div class="card-body">
+                   <div class="d-flex align-items-center">
+                     <div class="subheader">Overall Attendance</div>
+                   </div>
+                   <div class="d-flex align-items-baseline">
+                     <div class="h1 mb-0 me-2">86%</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+             
+             <!-- Principal institution overview -->
+             <div class="col-12">
+               <div class="card">
+                 <div class="card-header">
+                   <h3 class="card-title">Institution Overview</h3>
+                 </div>
+                 <div class="card-body">
+                   <h4>Department Performance</h4>
+                   <div class="table-responsive">
+                     <table class="table table-vcenter card-table">
+                       <thead>
+                         <tr>
+                           <th>Department</th>
+                           <th>HOD</th>
+                           <th>Faculty Count</th>
+                           <th>Student Count</th>
+                           <th>Avg. Attendance</th>
+                           <th>Actions</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                         <tr>
+                           <td>Computer Science</td>
+                           <td>Dr. Johnson</td>
+                           <td>18</td>
+                           <td>450</td>
+                           <td>
+                             <div class="text-success">91%</div>
+                           </td>
+                           <td>
+                             <a href="#" class="btn btn-sm btn-primary">View Details</a>
+                           </td>
+                         </tr>
+                         <tr>
+                           <td>Electrical Engineering</td>
+                           <td>Dr. Williams</td>
+                           <td>15</td>
+                           <td>380</td>
+                           <td>
+                             <div class="text-success">88%</div>
+                           </td>
+                           <td>
+                             <a href="#" class="btn btn-sm btn-primary">View Details</a>
+                           </td>
+                         </tr>
+                         <tr>
+                           <td>Mechanical Engineering</td>
+                           <td>Dr. Davis</td>
+                           <td>16</td>
+                           <td>420</td>
+                           <td>
+                             <div class="text-success">87%</div>
+                           </td>
+                           <td>
+                             <a href="#" class="btn btn-sm btn-primary">View Details</a>
+                           </td>
+                         </tr>
+                         <tr>
+                           <td>Civil Engineering</td>
+                           <td>Dr. Miller</td>
+                           <td>14</td>
+                           <td>350</td>
+                           <td>
+                             <div class="text-warning">82%</div>
+                           </td>
+                           <td>
+                             <a href="#" class="btn btn-sm btn-primary">View Details</a>
+                           </td>
+                         </tr>
+                       </tbody>
+                     </table>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           <% } %>
+           
+           <!-- Quick Actions Card (for all users) -->
+           <div class="col-md-6 col-lg-4">
+             <div class="card">
+               <div class="card-header">
+                 <h3 class="card-title">Quick Actions</h3>
+               </div>
+               <div class="list-group list-group-flush">
+                 <a href="/profile" class="list-group-item list-group-item-action">
+                   <div class="row align-items-center">
+                     <div class="col-auto"><i class="ti ti-user text-blue"></i></div>
+                     <div class="col">My Profile</div>
+                   </div>
+                 </a>
+                 
+                 <% if (user.role === 'admin') { %>
+                   <a href="/faculty/new" class="list-group-item list-group-item-action">
+                     <div class="row align-items-center">
+                       <div class="col-auto"><i class="ti ti-user-plus text-blue"></i></div>
+                       <div class="col">Add New Faculty</div>
+                     </div>
+                   </a>
+                   <a href="/students/new" class="list-group-item list-group-item-action">
+                     <div class="row align-items-center">
+                       <div class="col-auto"><i class="ti ti-user-plus text-blue"></i></div>
+                       <div class="col">Add New Student</div>
+                     </div>
+                   </a>
+                 <% } %>
+                 
+                 <% if (user.role === 'faculty' || user.role === 'hod') { %>
+                   <a href="/attendance/mark" class="list-group-item list-group-item-action">
+                     <div class="row align-items-center">
+                       <div class="col-auto"><i class="ti ti-checklist text-blue"></i></div>
+                       <div class="col">Mark Attendance</div>
+                     </div>
+                   </a>
+                   <a href="/timetable" class="list-group-item list-group-item-action">
+                     <div class="row align-items-center">
+                       <div class="col-auto"><i class="ti ti-calendar text-blue"></i></div>
+                       <div class="col">My Timetable</div>
+                     </div>
+                   </a>
+                 <% } %>
+                 
+                 <% if (user.role === 'student') { %>
+                   <a href="/my-attendance" class="list-group-item list-group-item-action">
+                     <div class="row align-items-center">
+                       <div class="col-auto"><i class="ti ti-calendar-stats text-blue"></i></div>
+                       <div class="col">My Attendance</div>
+                     </div>
+                   </a>
+                   <a href="/my-courses" class="list-group-item list-group-item-action">
+                     <div class="row align-items-center">
+                       <div class="col-auto"><i class="ti ti-books text-blue"></i></div>
+                       <div class="col">My Courses</div>
+                     </div>
+                   </a>
+                 <% } %>
+                 
+                 <a href="/settings" class="list-group-item list-group-item-action">
+                   <div class="row align-items-center">
+                     <div class="col-auto"><i class="ti ti-settings text-blue"></i></div>
+                     <div class="col">Settings</div>
+                   </div>
+                 </a>
+               </div>
+             </div>
+           </div>
+           
+           <!-- Recent Notifications -->
+           <div class="col-md-6 col-lg-8">
+             <div class="card">
+               <div class="card-header">
+                 <h3 class="card-title">Notifications</h3>
+               </div>
+               <div class="list-group list-group-flush">
+                 <div class="list-group-item">
+                   <div class="row align-items-center">
+                     <div class="col-auto">
+                       <span class="status-dot status-dot-animated bg-red d-block"></span>
+                     </div>
+                     <div class="col text-truncate">
+                       <span class="text-body d-block">System Maintenance Notice</span>
+                       <div class="d-block text-muted text-truncate mt-n1">
+                         The system will be down for maintenance on Sunday, May 15, 2025, from 2:00 AM to 5:00 AM.
+                       </div>
+                     </div>
+                     <div class="col-auto">
+                       <div class="badge bg-primary">New</div>
+                     </div>
+                   </div>
+                 </div>
+                 <div class="list-group-item">
+                   <div class="row align-items-center">
+                     <div class="col-auto">
+                       <span class="status-dot d-block"></span>
+                     </div>
+                     <div class="col text-truncate">
+                       <span class="text-body d-block">Academic Calendar Updated</span>
+                       <div class="d-block text-muted text-truncate mt-n1">
+                         The academic calendar for the upcoming semester has been updated. Please check for exam dates.
+                       </div>
+                     </div>
+                     <div class="col-auto">
+                       <div class="badge">3d ago</div>
+                     </div>
+                   </div>
+                 </div>
+                 <div class="list-group-item">
+                   <div class="row align-items-center">
+                     <div class="col-auto">
+                       <span class="status-dot d-block"></span>
+                     </div>
+                     <div class="col text-truncate">
+                       <span class="text-body d-block">New Feature: Mobile App</span>
+                       <div class="d-block text-muted text-truncate mt-n1">
+                         Our new mobile app is available now. Download it from the app store for convenient access.
+                       </div>
+                     </div>
+                     <div class="col-auto">
+                       <div class="badge">1w ago</div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+     
+     <!-- Footer -->
+     <footer class="footer footer-transparent d-print-none">
+       <div class="container-xl">
+         <div class="row text-center align-items-center flex-row-reverse">
+           <div class="col-lg-auto ms-lg-auto">
+             <ul class="list-inline list-inline-dots mb-0">
+               <li class="list-inline-item"><a href="/help" class="link-secondary">Help</a></li>
+               <li class="list-inline-item"><a href="/contact" class="link-secondary">Contact</a></li>
+             </ul>
+           </div>
+           <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+             <ul class="list-inline list-inline-dots mb-0">
+               <li class="list-inline-item">
+                 Copyright &copy; 2025 SFCMS
+               </li>
+               <li class="list-inline-item">
+                 <a href="/privacy" class="link-secondary">Privacy Policy</a>
+               </li>
+             </ul>
+           </div>
+         </div>
+       </div>
+     </footer>
+   </div>
+ </div>
+ 
+ <!-- Generate Report Modal -->
+ <div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered" role="document">
+     <div class="modal-content">
+       <div class="modal-header">
+         <h5 class="modal-title">Generate Report</h5>
+         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+       </div>
+       <div class="modal-body">
+         <div class="mb-3">
+           <label class="form-label">Report Type</label>
+           <select class="form-select">
+             <option value="attendance">Attendance Report</option>
+             <option value="student">Student Performance Report</option>
+             <option value="faculty">Faculty Report</option>
+             <option value="department">Department Report</option>
+           </select>
+         </div>
+         <div class="mb-3">
+           <label class="form-label">Date Range</label>
+           <div class="input-group">
+             <input type="date" class="form-control" value="2025-05-01">
+             <span class="input-group-text">to</span>
+             <input type="date" class="form-control" value="2025-05-11">
+           </div>
+         </div>
+         <div class="mb-3">
+           <label class="form-label">Format</label>
+           <div class="form-selectgroup">
+             <label class="form-selectgroup-item">
+               <input type="radio" name="report-format" value="pdf" class="form-selectgroup-input" checked>
+               <span class="form-selectgroup-label">PDF</span>
+             </label>
+             <label class="form-selectgroup-item">
+               <input type="radio" name="report-format" value="excel" class="form-selectgroup-input">
+               <span class="form-selectgroup-label">Excel</span>
+             </label>
+             <label class="form-selectgroup-item">
+               <input type="radio" name="report-format" value="csv" class="form-selectgroup-input">
+               <span class="form-selectgroup-label">CSV</span>
+             </label>
+           </div>
+         </div>
+       </div>
+       <div class="modal-footer">
+         <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+           Cancel
+         </a>
+         <a href="#" class="btn btn-primary ms-auto" data-bs-dismiss="modal">
+           <i class="ti ti-file-download me-1"></i>
+           Generate Report
+         </a>
+       </div>
+     </div>
+   </div>
+ </div>
+ 
+ <script src="https://unpkg.com/@tabler/core@latest/dist/js/tabler.min.js"></script>
+ <script>
+   document.addEventListener('DOMContentLoaded', function() {
+     // Initialize tooltips
+     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+       return new bootstrap.Tooltip(tooltipTriggerEl)
+     });
+     
+     // Add any other JavaScript initialization here
+   });
+ </script>
+</body>
+</html>

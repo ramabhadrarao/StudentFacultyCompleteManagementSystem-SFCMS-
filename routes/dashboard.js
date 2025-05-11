@@ -1,27 +1,16 @@
-// routes/dashboard.js
+// routes/dashboard.js - Fix this file
 const express = require('express');
 const router = express.Router();
 const { isAuthenticated } = require('../middleware/auth');
 
-router.get('/', isAuthenticated, async (req, res) => {
+// Dashboard home
+router.get('/', isAuthenticated, (req, res) => {
   try {
-    // Different dashboards based on user role
-    const userRole = req.session.user.role;
-    
-    switch(userRole) {
-      case 'admin':
-        return res.render('dashboard/admin');
-      case 'faculty':
-        return res.render('dashboard/faculty');
-      case 'student':
-        return res.render('dashboard/student');
-      case 'hod':
-        return res.render('dashboard/hod');
-      case 'principal':
-        return res.render('dashboard/principal');
-      default:
-        return res.render('dashboard/default');
-    }
+    // Use a single dashboard file instead of trying to render different files based on role
+    res.render('dashboard/index', {
+      title: 'Dashboard',
+      user: req.session.user
+    });
   } catch (err) {
     console.error('Dashboard error:', err);
     req.flash('error', 'Failed to load dashboard');

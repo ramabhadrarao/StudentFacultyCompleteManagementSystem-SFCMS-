@@ -1,69 +1,53 @@
+<!-- views/auth/login.ejs -->
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - ERP</title>
-    <link href="https://unpkg.com/@tabler/core@latest/dist/css/tabler.min.css" rel="stylesheet" />
-  </head>
-  <body class="d-flex flex-column bg-light">
-
-    <div class="page page-center">
-      <div class="container-tight py-4">
-        <div class="text-center mb-4">
-          <a href="/" class="navbar-brand">
-            <img src="/logo.svg" height="36" alt="ERP Logo" />
-          </a>
+<%- include('../partials/head', { title: 'Login' }) %>
+<body class="d-flex flex-column bg-light">
+  <div class="page page-center">
+    <div class="container-tight py-4">
+      <div class="text-center mb-4">
+        <a href="/">
+          <img src="https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_clr_74x24px.svg" alt="Logo" class="login-logo">
+        </a>
+      </div>
+      
+      <%- include('../partials/messages') %>
+      
+      <form class="card card-md" action="/login" method="POST">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-4">Login to your account</h2>
+          
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" required>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <div class="input-group input-group-flat">
+              <input type="password" class="form-control" name="password" required>
+            </div>
+          </div>
+          
+          <div class="mb-2">
+            <label class="form-check">
+              <input type="checkbox" class="form-check-input" name="remember">
+              <span class="form-check-label">Remember me</span>
+            </label>
+          </div>
+          
+          <div class="form-footer">
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+          </div>
         </div>
-
-        <% if (error_msg) { %>
-          <div class="alert alert-danger">
-            <%= error_msg %>
-          </div>
-        <% } %>
-        <% if (success_msg) { %>
-          <div class="alert alert-success">
-            <%= success_msg %>
-          </div>
-        <% } %>
-        <% if (error) { %>
-          <div class="alert alert-danger">
-            <%= error %>
-          </div>
-        <% } %>
-
-        <form class="card card-md" action="/login" method="POST" autocomplete="off">
-          <div class="card-body">
-            <h2 class="card-title text-center mb-4">Login to your account</h2>
-            <div class="mb-3">
-              <label class="form-label">Email</label>
-              <input type="email" class="form-control" name="email" required autofocus />
-            </div>
-            <div class="mb-2">
-              <label class="form-label">Password</label>
-              <div class="input-group input-group-flat">
-                <input type="password" class="form-control" name="password" required />
-              </div>
-            </div>
-            <div class="mb-2">
-              <label class="form-check">
-                <input type="checkbox" class="form-check-input" />
-                <span class="form-check-label">Remember me</span>
-              </label>
-            </div>
-            <div class="form-footer">
-              <button type="submit" class="btn btn-primary w-100">Login</button>
-            </div>
-          </div>
-        </form>
-
-        <div class="text-center text-muted mt-3">
-          Don't have an account?
-          <a href="/register" tabindex="-1">Register</a>
-        </div>
+      </form>
+      
+      <div class="text-center text-muted mt-3">
+        Don't have an account? <a href="/register">Register</a>
       </div>
     </div>
-
-    <script src="https://unpkg.com/@tabler/core@latest/dist/js/tabler.min.js"></script>
-  </body>
+  </div>
+  
+  <%- include('../partials/scripts') %>
+</body>
 </html>

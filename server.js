@@ -1,4 +1,4 @@
-// server.js
+// server.js (updated)
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -11,7 +11,12 @@ const methodOverride = require('method-override');
 const app = express();
 
 // Start replica set first
-require('./start-mongodb');
+try {
+  require('./start-mongodb');
+} catch (err) {
+  console.warn('Warning: Could not start MongoDB replica set automatically:', err.message);
+  console.warn('Make sure MongoDB is running before proceeding');
+}
 
 // DB connect
 const { connectDB } = require('./config/db');
@@ -47,34 +52,26 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
+// Routes - Only include routes that exist
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
-const facultyRoutes = require('./routes/faculty');
-const studentRoutes = require('./routes/student');
-const attendanceRoutes = require('./routes/attendance');
-const resultsRoutes = require('./routes/results');
-const hostelRoutes = require('./routes/hostel');
-const transportRoutes = require('./routes/transport');
-const adminRoutes = require('./routes/admin');
 
+const profileRoutes = require('./routes/profile');
 app.use('/', authRoutes);
 app.use('/dashboard', dashboardRoutes);
-app.use('/faculty', facultyRoutes);
-app.use('/student', studentRoutes);
-app.use('/attendance', attendanceRoutes);
-app.use('/results', resultsRoutes);
-app.use('/hostel', hostelRoutes);
-app.use('/transport', transportRoutes);
-app.use('/admin', adminRoutes);
+
+app.use('/profile', profileRoutes);
+
+
+// Home route
+app.get('/', (req, res) => {
+  res.redirect('/login');
+});
 
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  req.flash('error', 'Something went wrong');
-  res.status(500).render('error', { 
-    error: process.env.NODE_ENV === 'development' ? err : 'Server Error'
-  });
+  res.status(500).send('Something broke! ' + (process.env.NODE_ENV === 'development' ? err.message : ''));
 });
 
 // Start server

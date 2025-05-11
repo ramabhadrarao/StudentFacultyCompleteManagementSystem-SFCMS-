@@ -1,0 +1,88 @@
+<!-- views/auth/register.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - College ERP</title>
+  <link href="https://unpkg.com/@tabler/core@latest/dist/css/tabler.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body class="d-flex flex-column bg-light">
+  <div class="page page-center">
+    <div class="container-tight py-4">
+      <div class="text-center mb-4">
+        <a href="/">
+          <img src="https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_clr_74x24px.svg" alt="Logo" class="login-logo">
+        </a>
+      </div>
+      
+      <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+        <div class="alert alert-danger">
+          <% errors.forEach(function(error) { %>
+            <p><%= error %></p>
+          <% }); %>
+        </div>
+      <% } %>
+      
+      <% if (locals.error_msg && error_msg.length > 0) { %>
+        <div class="alert alert-danger">
+          <%= error_msg %>
+        </div>
+      <% } %>
+      
+      <% if (locals.success_msg && success_msg.length > 0) { %>
+        <div class="alert alert-success">
+          <%= success_msg %>
+        </div>
+      <% } %>
+      
+      <form class="card card-md" action="/register" method="POST">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-4">Create a new account</h2>
+          
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-control" name="username" value="<%= typeof username != 'undefined' ? username : '' %>" required>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Email address</label>
+            <input type="email" class="form-control" name="email" value="<%= typeof email != 'undefined' ? email : '' %>" required>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" name="password2" required>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select class="form-select" name="role">
+              <option value="student">Student</option>
+              <option value="faculty">Faculty</option>
+            </select>
+            <small class="form-hint">Note: Admin approval may be required for role activation</small>
+          </div>
+          
+          <div class="form-footer">
+            <button type="submit" class="btn btn-primary w-100">Create account</button>
+          </div>
+        </div>
+      </form>
+      
+      <div class="text-center text-muted mt-3">
+        Already have an account? <a href="/login">Sign in</a>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://unpkg.com/@tabler/core@latest/dist/js/tabler.min.js"></script>
+</body>
+</html>
