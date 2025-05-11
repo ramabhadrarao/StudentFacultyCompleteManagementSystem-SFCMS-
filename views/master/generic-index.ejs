@@ -1,0 +1,291 @@
+<!-- views/master/generic-index.ejs - Template for all master data views -->
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head', { title: title }) %>
+<body>
+  <div class="page">
+    <%- include('../partials/navbar') %>
+    <%- include('../partials/sidebar') %>
+    
+    <div class="page-wrapper">
+      <div class="container-xl">
+        <div class="page-header d-print-none">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="page-title"><%= title %></h2>
+            </div>
+            <div class="col-auto ms-auto">
+              <div class="btn-list">
+                <button type="button" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-add">
+                  <i class="ti ti-plus"></i>
+                  Add <%= displayName %>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="page-body">
+        <div class="container-xl">
+          <%- include('../partials/messages') %>
+          
+          <!-- Filter panel -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <form action="/master/<%= modelName.toLowerCase() %>" method="GET" class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label">Search</label>
+                  <div class="input-icon">
+                    <input type="text" class="form-control" name="search" value="<%= searchTerm || '' %>" placeholder="Search...">
+                    <span class="input-icon-addon">
+                      <i class="ti ti-search"></i>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                  <button type="submit" class="btn btn-primary w-100">
+                    <i class="ti ti-search me-1"></i>
+                    Search
+                  </button>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                  <a href="/master/<%= modelName.toLowerCase() %>" class="btn btn-outline-secondary w-100">
+                    <i class="ti ti-refresh me-1"></i>
+                    Reset
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+          
+          <!-- Data table -->
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-vcenter table-hover card-table">
+                  <thead>
+                    <tr>
+                      <% listFields.forEach(field => { %>
+                        <th><%= field.charAt(0).toUpperCase() + field.slice(1).replace('_id', '').replace(/_/g, ' ') %></th>
+                      <% }) %>
+                      <th class="w-1">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (items.length === 0) { %>
+                      <tr>
+                        <td colspan="<%= listFields.length + 1 %>" class="text-center">No records found</td>
+                      </tr>
+                    <% } else { %>
+                      <% items.forEach(item => { %>
+                        <tr>
+                          <% listFields.forEach(field => { %>
+                            <td>
+                              <% if (field.includes('_id') && relatedModels && relatedModels.includes(field) && item[field]) { %>
+                                <%= typeof item[field].name !== 'undefined' ? item[field].name : 
+                                     typeof item[field].department_name !== 'undefined' ? item[field].department_name : 
+                                     typeof item[field].program_name !== 'undefined' ? item[field].program_name : 
+                                     typeof item[field].batch_name !== 'undefined' ? item[field].batch_name : item[field] %>
+                              <% } else if (field === 'start_year' || field === 'end_year') { %>
+                                <%= item[field] %>
+                              <% } else { %>
+                                <%= item[field] %>
+                              <% } %>
+                            </td>
+                          <% }) %>
+                          <td>
+                            <div class="btn-list flex-nowrap">
+                              <button type="button" class="btn btn-sm btn-primary edit-btn"
+                                      data-id="<%= item._id %>"
+                                      <% listFields.forEach(field => { %>
+                                        <% if (field.includes('_id') && relatedModels && relatedModels.includes(field) && item[field]) { %>
+                                          data-<%= field %>="<%= item[field]._id %>"
+                                        <% } else { %>
+                                          data-<%= field %>="<%= item[field] %>"
+                                        <% } %>
+                                      <% }) %>
+                                      data-bs-toggle="modal" data-bs-target="#modal-edit">
+                                <i class="ti ti-edit"></i>
+                              </button>
+                              <button type="button" class="btn btn-sm btn-danger delete-btn"
+                                      data-id="<%= item._id %>"
+                                      data-name="<%= item.name || item.batch_name || item.department_name || item.program_name %>"
+                                      data-bs-toggle="modal" data-bs-target="#modal-delete">
+                                <i class="ti ti-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Pagination -->
+              <% if (pagination.pages > 1) { %>
+                <div class="mt-3 d-flex justify-content-center">
+                  <ul class="pagination">
+                    <% if (pagination.page > 1) { %>
+                      <li class="page-item">
+                        <a class="page-link" href="/master/<%= modelName.toLowerCase() %>?page=<%= pagination.page - 1 %><%= searchTerm ? '&search=' + searchTerm : '' %>">
+                          <i class="ti ti-chevron-left"></i>
+                          Prev
+                        </a>
+                      </li>
+                    <% } else { %>
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#">
+                          <i class="ti ti-chevron-left"></i>
+                          Prev
+                        </a>
+                      </li>
+                    <% } %>
+                    
+                    <% for (let i = 1; i <= pagination.pages; i++) { %>
+                      <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                        <a class="page-link" href="/master/<%= modelName.toLowerCase() %>?page=<%= i %><%= searchTerm ? '&search=' + searchTerm : '' %>"><%= i %></a>
+                      </li>
+                    <% } %>
+                    
+                    <% if (pagination.page < pagination.pages) { %>
+                      <li class="page-item">
+                        <a class="page-link" href="/master/<%= modelName.toLowerCase() %>?page=<%= pagination.page + 1 %><%= searchTerm ? '&search=' + searchTerm : '' %>">
+                          Next
+                          <i class="ti ti-chevron-right"></i>
+                        </a>
+                      </li>
+                    <% } else { %>
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#">
+                          Next
+                          <i class="ti ti-chevron-right"></i>
+                        </a>
+                      </li>
+                    <% } %>
+                  </ul>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+  
+  <!-- Add Modal -->
+  <div class="modal modal-blur fade" id="modal-add" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add <%= displayName %></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="/master/<%= modelName.toLowerCase() %>" method="POST">
+          <div class="modal-body">
+            <% requiredFields.forEach(field => { %>
+              <div class="mb-3">
+                <% if (field.includes('_id') && relatedModels && relatedModels.includes(field)) { %>
+                  <label class="form-label required"><%= field.replace('_id', '').charAt(0).toUpperCase() + field.replace('_id', '').slice(1) %></label>
+                  <select class="form-select" name="<%= field %>" required>
+                    <option value="">Select <%= field.replace('_id', '').charAt(0).toUpperCase() + field.replace('_id', '').slice(1) %></option>
+                    <% if (relatedData && relatedData[field]) { %>
+                      <% relatedData[field].forEach(option => { %>
+                        <option value="<%= option._id %>">
+                          <%= option.name || option.department_name || option.program_name || option.batch_name %>
+                        </option>
+                      <% }) %>
+                    <% } %>
+                  </select>
+                <% } else if (field === 'start_year' || field === 'end_year') { %>
+                  <label class="form-label required"><%= field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ') %></label>
+                  <input type="number" class="form-control" name="<%= field %>" min="2000" max="2100" required>
+                <% } else { %>
+                  <label class="form-label required"><%= field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ') %></label>
+                  <input type="text" class="form-control" name="<%= field %>" required>
+                <% } %>
+              </div>
+            <% }) %>
+            
+            <% listFields.forEach(field => { 
+                 if (!requiredFields.includes(field)) { %>
+                  <div class="mb-3">
+                    <% if (field.includes('_id') && relatedModels && relatedModels.includes(field)) { %>
+                      <label class="form-label"><%= field.replace('_id', '').charAt(0).toUpperCase() + field.replace('_id', '').slice(1) %></label>
+                      <select class="form-select" name="<%= field %>">
+                        <option value="">Select <%= field.replace('_id', '').charAt(0).toUpperCase() + field.replace('_id', '').slice(1) %></option>
+                        <% if (relatedData && relatedData[field]) { %>
+                          <% relatedData[field].forEach(option => { %>
+                            <option value="<%= option._id %>">
+                              <%= option.name || option.department_name || option.program_name || option.batch_name %>
+                            </option>
+                          <% }) %>
+                        <% } %>
+                      </select>
+                    <% } else if (field === 'start_year' || field === 'end_year') { %>
+                      <label class="form-label"><%= field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ') %></label>
+                      <input type="number" class="form-control" name="<%= field %>" min="2000" max="2100">
+                    <% } else { %>
+                      <label class="form-label"><%= field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ') %></label>
+                      <input type="text" class="form-control" name="<%= field %>">
+                    <% } %>
+                  </div>
+                <% } 
+               }) %>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary ms-auto">
+              <i class="ti ti-plus me-1"></i>
+              Create <%= displayName %>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Edit Modal -->
+  <div class="modal modal-blur fade" id="modal-edit" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit <%= displayName %></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="edit-form" action="/master/<%= modelName.toLowerCase() %>/update/" method="POST">
+          <div class="modal-body">
+            <% requiredFields.forEach(field => { %>
+              <div class="mb-3">
+                <% if (field.includes('_id') && relatedModels && relatedModels.includes(field)) { %>
+                  <label class="form-label required"><%= field.replace('_id', '').charAt(0).toUpperCase() + field.replace('_id', '').slice(1) %></label>
+                  <select class="form-select" name="<%= field %>" id="edit-<%= field %>" required>
+                    <option value="">Select <%= field.replace('_id', '').charAt(0).toUpperCase() + field.replace('_id', '').slice(1) %></option>
+                    <% if (relatedData && relatedData[field]) { %>
+                      <% relatedData[field].forEach(option => { %>
+                        <option value="<%= option._id %>">
+                          <%= option.name || option.department_name || option.program_name || option.batch_name %>
+                        </option>
+                      <% }) %>
+                    <% } %>
+                  </select>
+                <% } else if (field === 'start_year' || field === 'end_year') { %>
+                  <label class="form-label required"><%= field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ') %></label>
+                  <input type="number" class="form-control" id="edit-<%= field %>" name="<%= field %>" min="2000" max="2100" required>
+                <% } else { %>
+                  <label class="form-label required"><%= field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ') %></label>
+                  <input type="text" class="form-control" id="edit-<%= field %>" name="<%= field %>" required>
+                <% } %>
+              </div>
+            <% }) %>
+            
+            <% listFields.forEach(field => { 
+                 if (!requiredFields.includes(field)) { %>
+                  <div class="mb-3">
+                    <% if (field.includes('_id') && relatedModels && relatedModels.includes(field)) { %>
+                      <label class="form-label"><%= field.replace('

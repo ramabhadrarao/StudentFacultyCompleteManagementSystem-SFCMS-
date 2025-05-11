@@ -31,13 +31,110 @@
                   <i class="ti ti-users me-1"></i>
                   User Management
                 </a>
-                <a class="dropdown-item" href="/admin/roles">
-                  <i class="ti ti-shield me-1"></i>
-                  Roles & Permissions
+              </div>
+            </li>
+          <% } %>
+          
+          <!-- Academic Master Data Menu (Admin, Principal) -->
+          <% if (user && (user.role === 'admin' || user.role === 'principal')) { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#navbar-master-data" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-database"></i>
+                </span>
+                <span class="nav-link-title">
+                  Master Data
+                </span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="/master/department">
+                  <i class="ti ti-building me-1"></i>
+                  Departments
                 </a>
+                <a class="dropdown-item" href="/master/program">
+                  <i class="ti ti-certificate me-1"></i>
+                  Programs
+                </a>
+                <a class="dropdown-item" href="/master/batch">
+                  <i class="ti ti-users-group me-1"></i>
+                  Batches
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/master/gender">
+                  <i class="ti ti-gender-bigender me-1"></i>
+                  Genders
+                </a>
+                <a class="dropdown-item" href="/master/nationality">
+                  <i class="ti ti-flag me-1"></i>
+                  Nationalities
+                </a>
+                <a class="dropdown-item" href="/master/religion">
+                  <i class="ti ti-prayer me-1"></i>
+                  Religions
+                </a>
+                <a class="dropdown-item" href="/master/studenttype">
+                  <i class="ti ti-user-cog me-1"></i>
+                  Student Types
+                </a>
+                <a class="dropdown-item" href="/master/caste">
+                  <i class="ti ti-users me-1"></i>
+                  Castes
+                </a>
+                <a class="dropdown-item" href="/master/subcaste">
+                  <i class="ti ti-user-circle me-1"></i>
+                  Sub Castes
+                </a>
+              </div>
+            </li>
+          <% } %>
+
+          <!-- Role & Permission Management (Admin only) -->
+          <% if (user && user.role === 'admin') { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#navbar-roles" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-shield-lock"></i>
+                </span>
+                <span class="nav-link-title">
+                  Access Control
+                </span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="/admin/roles">
+                  <i class="ti ti-user-shield me-1"></i>
+                  Roles
+                </a>
+                <a class="dropdown-item" href="/admin/roles/permissions">
+                  <i class="ti ti-key me-1"></i>
+                  Permissions
+                </a>
+              </div>
+            </li>
+          <% } %>
+
+          <!-- System Settings (Admin only) -->
+          <% if (user && user.role === 'admin') { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#navbar-settings" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-settings"></i>
+                </span>
+                <span class="nav-link-title">
+                  System
+                </span>
+              </a>
+              <div class="dropdown-menu">
                 <a class="dropdown-item" href="/admin/settings">
                   <i class="ti ti-adjustments me-1"></i>
                   System Settings
+                </a>
+                <a class="dropdown-item" href="/admin/settings/system-info">
+                  <i class="ti ti-info-circle me-1"></i>
+                  System Information
+                </a>
+                <a class="dropdown-item" href="/admin/settings/backup">
+                  <i class="ti ti-database-export me-1"></i>
+                  Backup & Restore
                 </a>
               </div>
             </li>
@@ -96,42 +193,6 @@
                 <a class="dropdown-item" href="/faculty/assignments">
                   <i class="ti ti-calendar-event me-1"></i>
                   Teaching Assignments
-                </a>
-              </div>
-            </li>
-          <% } %>
-          
-          <!-- Academic Structure Menu -->
-          <% if (user && ['admin', 'principal', 'hod'].includes(user.role)) { %>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#navbar-academics" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
-                <span class="nav-link-icon d-md-none d-lg-inline-block">
-                  <i class="ti ti-building"></i>
-                </span>
-                <span class="nav-link-title">
-                  Academics
-                </span>
-              </a>
-              <div class="dropdown-menu">
-                <a class="dropdown-item" href="/departments">
-                  <i class="ti ti-building me-1"></i>
-                  Departments
-                </a>
-                <a class="dropdown-item" href="/programs">
-                  <i class="ti ti-certificate me-1"></i>
-                  Programs
-                </a>
-                <a class="dropdown-item" href="/courses">
-                  <i class="ti ti-book me-1"></i>
-                  Courses
-                </a>
-                <a class="dropdown-item" href="/batches">
-                  <i class="ti ti-users-group me-1"></i>
-                  Batches
-                </a>
-                <a class="dropdown-item" href="/academic-calendar">
-                  <i class="ti ti-calendar me-1"></i>
-                  Academic Calendar
                 </a>
               </div>
             </li>
@@ -199,7 +260,7 @@
             </li>
           <% } %>
           
-          <!-- Create public/uploads folders -->
+          <!-- Profile Link -->
           <li class="nav-item">
             <a class="nav-link" href="/profile">
               <span class="nav-link-icon d-md-none d-lg-inline-block">

@@ -75,6 +75,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const profileRoutes = require('./routes/profile');
 const adminUserRoutes = require('./routes/admin/users');
 const studentRoutes = require('./routes/students');
+const masterRoutes = require('./routes/master');
 
 // Apply routes
 app.use('/', authRoutes);
@@ -82,7 +83,7 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/profile', profileRoutes);
 app.use('/admin/users', adminUserRoutes);
 app.use('/students', studentRoutes);
-
+app.use('/master', masterRoutes);
 // Home route
 app.get('/', (req, res) => {
   res.redirect('/login');
