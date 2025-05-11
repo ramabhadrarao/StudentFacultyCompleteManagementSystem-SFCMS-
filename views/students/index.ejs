@@ -1,0 +1,49 @@
+<!-- views/students/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head', { title: 'Student Management' }) %>
+<body>
+  <div class="page">
+    <%- include('../partials/header') %>
+    <%- include('../partials/navigation') %>
+    
+    <div class="page-wrapper">
+      <div class="container-xl">
+        <div class="page-header d-print-none">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="page-title">Student Management</h2>
+            </div>
+            <div class="col-auto ms-auto">
+              <div class="btn-list">
+                <a href="/students/create" class="btn btn-primary d-none d-sm-inline-block">
+                  <i class="ti ti-plus"></i>
+                  Add Student
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="page-body">
+        <div class="container-xl">
+          <%- include('../partials/messages') %>
+          
+          <!-- Students will be displayed here -->
+          <div class="card">
+            <div class="card-body">
+              <h3>Student List</h3>
+              <p>This is a placeholder for the student list. Implement the full view later.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+  
+  <%- include('../partials/scripts') %>
+</body>
+</html>

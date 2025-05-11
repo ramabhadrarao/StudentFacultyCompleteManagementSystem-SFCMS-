@@ -1,0 +1,64 @@
+<!-- views/admin/users/create.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../../partials/head', { title: 'Create User' }) %>
+<body>
+  <div class="page">
+    <%- include('../../partials/navbar') %>
+    <%- include('../../partials/sidebar') %>
+    
+    <div class="page-wrapper">
+      <div class="container-xl">
+        <div class="page-header d-print-none">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="page-title">Create User</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="page-body">
+        <div class="container-xl">
+          <%- include('../../partials/messages') %>
+          
+          <div class="card">
+            <div class="card-body">
+              <form action="/admin/users/create" method="POST">
+                <div class="form-group mb-3">
+                  <label class="form-label required">Username</label>
+                  <input type="text" class="form-control" name="username" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label required">Email</label>
+                  <input type="email" class="form-control" name="email" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label required">Password</label>
+                  <input type="password" class="form-control" name="password" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label required">Role</label>
+                  <select class="form-select" name="role" required>
+                    <% roles.forEach(role => { %>
+                      <option value="<%= role %>"><%= role.charAt(0).toUpperCase() + role.slice(1) %></option>
+                    <% }) %>
+                  </select>
+                </div>
+                <div class="form-footer">
+                  <a href="/admin/users" class="btn btn-link">Cancel</a>
+                  <button type="submit" class="btn btn-primary">Create User</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <%- include('../../partials/footer') %>
+    </div>
+  </div>
+  
+  <%- include('../../partials/scripts') %>
+</body>
+</html>

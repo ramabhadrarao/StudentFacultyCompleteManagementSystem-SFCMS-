@@ -1,0 +1,93 @@
+<!-- views/dashboard/partials/faculty-stats.ejs -->
+<div class="row row-deck row-cards">
+  <!-- Stats Cards -->
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">My Courses</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.courseCount || 0 %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Today's Classes</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.classesToday || 0 %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Pending Tasks</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.pendingTasks || 0 %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Average Attendance</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.avgAttendance || 0 %>%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Faculty Timetable -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Today's Schedule</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table card-table table-vcenter">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Course</th>
+              <th>Batch</th>
+              <th>Room</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (stats.todaySchedule && stats.todaySchedule.length > 0) { %>
+              <% stats.todaySchedule.forEach(schedule => { %>
+                <tr>
+                  <td><%= schedule.time %></td>
+                  <td><%= schedule.course %></td>
+                  <td><%= schedule.batch %></td>
+                  <td><%= schedule.room %></td>
+                  <td>
+                    <a href="/attendance/mark" class="btn btn-sm btn-primary">Mark Attendance</a>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="5" class="text-center">No classes scheduled for today</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

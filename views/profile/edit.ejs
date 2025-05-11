@@ -1,0 +1,57 @@
+<!-- views/profile/edit.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head', { title: 'Edit Profile' }) %>
+<body>
+  <div class="page">
+    <%- include('../partials/navbar') %>
+    <%- include('../partials/sidebar') %>
+    
+    <div class="page-wrapper">
+      <div class="container-xl">
+        <div class="page-header d-print-none">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="page-title">Edit Profile</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="page-body">
+        <div class="container-xl">
+          <%- include('../partials/messages') %>
+          
+          <div class="card">
+            <div class="card-body">
+              <form action="/profile/edit" method="POST">
+                <div class="form-group mb-3">
+                  <label class="form-label">Username</label>
+                  <input type="text" class="form-control" name="username" value="<%= user.username %>" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" name="email" value="<%= user.email %>" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label class="form-label">Role</label>
+                  <input type="text" class="form-control" value="<%= user.role %>" disabled>
+                  <div class="form-hint">Role cannot be changed</div>
+                </div>
+                <div class="form-footer">
+                  <a href="/profile" class="btn btn-link">Cancel</a>
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+  
+  <%- include('../partials/scripts') %>
+</body>
+</html>

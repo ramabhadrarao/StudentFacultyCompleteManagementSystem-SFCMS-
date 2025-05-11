@@ -1,0 +1,24 @@
+<!-- views/errors/404.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head', { title: 'Page Not Found' }) %>
+<body class="border-top-wide border-primary d-flex flex-column">
+  <div class="page page-center">
+    <div class="container-tight py-4">
+      <div class="empty">
+        <div class="empty-header">404</div>
+        <p class="empty-title">Oops… You just found an error page</p>
+        <p class="empty-subtitle text-muted">
+          We are sorry but the page you are looking for was not found
+        </p>
+        <div class="empty-action">
+          <a href="/dashboard" class="btn btn-primary">
+            <i class="ti ti-arrow-left me-2"></i>
+            Take me home
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

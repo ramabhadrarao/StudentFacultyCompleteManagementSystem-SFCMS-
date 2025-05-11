@@ -1,0 +1,205 @@
+<!-- views/partials/navigation.ejs -->
+<div class="navbar-expand-md">
+  <div class="collapse navbar-collapse" id="navbar-menu">
+    <div class="navbar navbar-light">
+      <div class="container-xl">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="/dashboard">
+              <span class="nav-link-icon d-md-none d-lg-inline-block">
+                <i class="ti ti-home"></i>
+              </span>
+              <span class="nav-link-title">
+                Dashboard
+              </span>
+            </a>
+          </li>
+          
+          <!-- User Management Section (Admin only) -->
+          <% if (user && user.role === 'admin') { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#navbar-users" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-users"></i>
+                </span>
+                <span class="nav-link-title">
+                  Users
+                </span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="/admin/users">
+                  <i class="ti ti-users me-1"></i>
+                  Manage Users
+                </a>
+                <a class="dropdown-item" href="/admin/users/create">
+                  <i class="ti ti-user-plus me-1"></i>
+                  Add User
+                </a>
+                <a class="dropdown-item" href="/admin/roles">
+                  <i class="ti ti-shield me-1"></i>
+                  Roles & Permissions
+                </a>
+              </div>
+            </li>
+          <% } %>
+          
+          <!-- Staff Management Section (Admin, Principal, HOD) -->
+          <% if (user && (user.role === 'admin' || user.role === 'hod' || user.role === 'principal')) { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#navbar-staff" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-users"></i>
+                </span>
+                <span class="nav-link-title">
+                  Faculty
+                </span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="/faculty">
+                  <i class="ti ti-user me-1"></i>
+                  Faculty List
+                </a>
+                <a class="dropdown-item" href="/faculty/new">
+                  <i class="ti ti-user-plus me-1"></i>
+                  Add Faculty
+                </a>
+              </div>
+            </li>
+          <% } %>
+          
+          <!-- Students Section -->
+          <% if (user && ['admin', 'principal', 'hod', 'faculty'].includes(user.role)) { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#navbar-students" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-building-bank"></i>
+                </span>
+                <span class="nav-link-title">
+                  Students
+                </span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="/students">
+                  <i class="ti ti-users me-1"></i>
+                  Student List
+                </a>
+                <% if (['admin', 'principal', 'hod'].includes(user.role)) { %>
+                  <a class="dropdown-item" href="/students/create">
+                    <i class="ti ti-user-plus me-1"></i>
+                    Add Student
+                  </a>
+                  <a class="dropdown-item" href="/students/import">
+                    <i class="ti ti-upload me-1"></i>
+                    Import Students
+                  </a>
+                <% } %>
+                <a class="dropdown-item" href="/batches">
+                  <i class="ti ti-brand-tableau me-1"></i>
+                  Batches
+                </a>
+              </div>
+            </li>
+          <% } %>
+          
+          <!-- Attendance Section (Faculty, HOD) -->
+          <% if (user && (user.role === 'faculty' || user.role === 'hod')) { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#navbar-attendance" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-calendar"></i>
+                </span>
+                <span class="nav-link-title">
+                  Attendance
+                </span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="/attendance/mark">
+                  <i class="ti ti-checklist me-1"></i>
+                  Mark Attendance
+                </a>
+                <a class="dropdown-item" href="/attendance/report">
+                  <i class="ti ti-file-analytics me-1"></i>
+                  Attendance Reports
+                </a>
+              </div>
+            </li>
+          <% } %>
+          
+          <!-- Student Section (Student) -->
+          <% if (user && user.role === 'student') { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/my-attendance">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-calendar-stats"></i>
+                </span>
+                <span class="nav-link-title">
+                  My Attendance
+                </span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/my-courses">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-books"></i>
+                </span>
+                <span class="nav-link-title">
+                  My Courses
+                </span>
+              </a>
+            </li>
+          <% } %>
+          
+          <!-- Academics Section (Admin) -->
+          <% if (user && user.role === 'admin') { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#navbar-academics" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-building"></i>
+                </span>
+                <span class="nav-link-title">
+                  Academics
+                </span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="/departments">
+                  <i class="ti ti-building me-1"></i>
+                  Departments
+                </a>
+                <a class="dropdown-item" href="/programs">
+                  <i class="ti ti-certificate me-1"></i>
+                  Programs
+                </a>
+                <a class="dropdown-item" href="/courses">
+                  <i class="ti ti-book me-1"></i>
+                  Courses
+                </a>
+              </div>
+            </li>
+            
+            <!-- System Settings (Admin) -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#navbar-settings" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                  <i class="ti ti-settings"></i>
+                </span>
+                <span class="nav-link-title">
+                  System
+                </span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="/settings/system">
+                  <i class="ti ti-adjustments me-1"></i>
+                  System Settings
+                </a>
+                <a class="dropdown-item" href="/settings/backup">
+                  <i class="ti ti-database me-1"></i>
+                  Backup & Restore
+                </a>
+              </div>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

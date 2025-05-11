@@ -1,0 +1,132 @@
+<!-- views/dashboard/partials/student-stats.ejs -->
+<div class="row row-deck row-cards">
+  <!-- Stats Cards -->
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">My Courses</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.courseCount || 0 %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Today's Classes</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.classesToday || 0 %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Overall Attendance</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.overallAttendance || 0 %>%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">CGPA</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.cgpa || 0 %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Student Timetable -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Today's Schedule</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table card-table table-vcenter">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Course</th>
+              <th>Faculty</th>
+              <th>Room</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (stats.todaySchedule && stats.todaySchedule.length > 0) { %>
+              <% stats.todaySchedule.forEach(schedule => { %>
+                <tr>
+                  <td><%= schedule.time %></td>
+                  <td><%= schedule.course %></td>
+                  <td><%= schedule.faculty %></td>
+                  <td><%= schedule.room %></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="4" class="text-center">No classes scheduled for today</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Student Attendance Overview -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Attendance Overview</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <% if (stats.courseAttendance && stats.courseAttendance.length > 0) { %>
+            <% stats.courseAttendance.forEach(course => { %>
+              <div class="col-md-6 col-lg-4">
+                <div class="mb-3">
+                  <label class="form-label"><%= course.course %></label>
+                  <div class="progress mb-2">
+                    <div class="progress-bar <%= course.percentage >= 85 ? 'bg-primary' : (course.percentage >= 75 ? 'bg-warning' : 'bg-danger') %>" 
+                         style="width: <%= course.percentage %>%" 
+                         role="progressbar" 
+                         aria-valuenow="<%= course.percentage %>" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100" 
+                         aria-label="<%= course.percentage %>% Complete">
+                      <span class="visually-hidden"><%= course.percentage %>% Complete</span>
+                    </div>
+                  </div>
+                  <div class="text-muted <%= course.percentage < 75 ? 'text-danger' : '' %>">
+                    <%= course.percentage %>% (<%= course.attended %>/<%= course.total %> classes attended)
+                    <% if (course.percentage < 75) { %>
+                      - Below threshold
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="col-12">
+              <p class="text-muted">No attendance data available</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

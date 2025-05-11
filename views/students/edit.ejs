@@ -1,0 +1,266 @@
+<!-- views/students/edit.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head', { title: 'Edit Student' }) %>
+<body>
+  <div class="page">
+    <%- include('../partials/navbar') %>
+    <%- include('../partials/sidebar') %>
+    
+    <div class="page-wrapper">
+      <div class="container-xl">
+        <div class="page-header d-print-none">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="page-title">Edit Student</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="page-body">
+        <div class="container-xl">
+          <%- include('../partials/messages') %>
+          
+          <form action="/students/edit/<%= student._id %>" method="POST" enctype="multipart/form-data">
+            <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Personal Information</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label required">Name</label>
+                      <input type="text" class="form-control" name="name" value="<%= student.name %>" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Gender</label>
+                      <select class="form-select" name="gender_id">
+                        <option value="">Select Gender</option>
+                        <% genders.forEach(gender => { %>
+                          <option value="<%= gender._id %>" <%= student.gender_id && student.gender_id.equals(gender._id) ? 'selected' : '' %>>
+                            <%= gender.name %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Father's Name</label>
+                      <input type="text" class="form-control" name="father_name" value="<%= student.father_name || '' %>">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Mother's Name</label>
+                      <input type="text" class="form-control" name="mother_name" value="<%= student.mother_name || '' %>">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Mobile</label>
+                      <input type="text" class="form-control" name="mobile" value="<%= student.mobile || '' %>">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Email</label>
+                      <input type="email" class="form-control" name="email" value="<%= student.email || '' %>">
+                      <div class="form-hint">
+                        <% if (student.user_id) { %>
+                          Changing this will update the user account email
+                        <% } else { %>
+                          Adding an email will create a user account
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Aadhar Number</label>
+                      <input type="text" class="form-control" name="aadhar" value="<%= student.aadhar || '' %>">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Photo</label>
+                      <input type="file" class="form-control" name="photo" accept="image/jpeg,image/png">
+                      <% if (student.photo) { %>
+                        <div class="mt-2">
+                          <img src="<%= student.photo %>" alt="Student Photo" class="img-thumbnail" style="max-height: 100px;">
+                          <small class="text-muted">Current photo</small>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card mt-3">
+              <div class="card-header">
+                <h3 class="card-title">Academic Information</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label required">Admission Number</label>
+                      <input type="text" class="form-control" name="admission_no" value="<%= student.admission_no %>" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Registration Number</label>
+                      <input type="text" class="form-control" name="regd_no" value="<%= student.regd_no || '' %>">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label required">Batch</label>
+                      <select class="form-select" name="batch_id" required>
+                        <option value="">Select Batch</option>
+                        <% batches.forEach(batch => { %>
+                          <option value="<%= batch._id %>" <%= student.batch_id && student.batch_id.equals(batch._id) ? 'selected' : '' %>>
+                            <%= batch.batch_name %> (<%= batch.start_year %>-<%= batch.end_year %>)
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label class="form-label">Student Type</label>
+                      <select class="form-select" name="student_type_id">
+                        <option value="">Select Type</option>
+                        <% studentTypes.forEach(type => { %>
+                          <option value="<%= type._id %>" <%= student.student_type_id && student.student_type_id.equals(type._id) ? 'selected' : '' %>>
+                            <%= type.name %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card mt-3">
+              <div class="card-header">
+                <h3 class="card-title">Additional Information</h3>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <label class="form-label">Nationality</label>
+                      <select class="form-select" name="nationality_id">
+                        <option value="">Select Nationality</option>
+                        <% nationalities.forEach(nationality => { %>
+                          <option value="<%= nationality._id %>" <%= student.nationality_id && student.nationality_id.equals(nationality._id) ? 'selected' : '' %>>
+                            <%= nationality.name %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <label class="form-label">Religion</label>
+                      <select class="form-select" name="religion_id">
+                        <option value="">Select Religion</option>
+                        <% religions.forEach(religion => { %>
+                          <option value="<%= religion._id %>" <%= student.religion_id && student.religion_id.equals(religion._id) ? 'selected' : '' %>>
+                            <%= religion.name %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <label class="form-label">Caste</label>
+                      <select class="form-select" name="caste_id" id="caste-select">
+                        <option value="">Select Caste</option>
+                        <% castes.forEach(caste => { %>
+                          <option value="<%= caste._id %>" <%= student.caste_id && student.caste_id.equals(caste._id) ? 'selected' : '' %>>
+                            <%= caste.name %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <label class="form-label">Sub Caste</label>
+                      <select class="form-select" name="sub_caste_id" id="subcaste-select" <%= !student.caste_id ? 'disabled' : '' %>>
+                        <option value="">Select Sub Caste</option>
+                        <% subcastes.forEach(subcaste => { %>
+                          <option value="<%= subcaste._id %>" <%= student.sub_caste_id && student.sub_caste_id.equals(subcaste._id) ? 'selected' : '' %>>
+                            <%= subcaste.name %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer text-end">
+                <div class="d-flex">
+                  <a href="/students" class="btn btn-link">Cancel</a>
+                  <button type="submit" class="btn btn-primary ms-auto">Save Changes</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+  
+  <%- include('../partials/scripts') %>
+  
+  <script>
+    // Script for fetching sub-castes based on selected caste
+    document.addEventListener('DOMContentLoaded', function() {
+      const casteSelect = document.getElementById('caste-select');
+      const subcasteSelect = document.getElementById('subcaste-select');
+      
+      casteSelect.addEventListener('change', function() {
+        const casteId = this.value;
+        
+        if (!casteId) {
+          subcasteSelect.innerHTML = '<option value="">Select Caste First</option>';
+          subcasteSelect.disabled = true;
+          return;
+        }
+        
+        // Fetch sub-castes for selected caste
+        fetch(`/students/subcastes/${casteId}`)
+          .then(response => response.json())
+          .then(data => {
+            subcasteSelect.innerHTML = '<option value="">Select Sub Caste</option>';
+            data.forEach(subcaste => {
+              const option = document.createElement('option');
+              option.value = subcaste._id;
+              option.textContent = subcaste.name;
+              subcasteSelect.appendChild(option);
+            });
+            subcasteSelect.disabled = false;
+          })
+          .catch(error => {
+            console.error('Error fetching sub-castes:', error);
+            subcasteSelect.innerHTML = '<option value="">Error loading sub-castes</option>';
+            subcasteSelect.disabled = true;
+          });
+      });
+    });
+  </script>
+</body>
+</html>

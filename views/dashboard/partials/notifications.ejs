@@ -1,0 +1,44 @@
+<!-- views/dashboard/partials/notifications.ejs -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Notifications</h3>
+  </div>
+  <div class="list-group list-group-flush">
+    <% if (notifications && notifications.length > 0) { %>
+      <% notifications.forEach(notification => { %>
+        <div class="list-group-item">
+          <div class="row align-items-center">
+            <div class="col-auto">
+              <span class="status-dot <%= notification.isNew ? 'status-dot-animated bg-red' : '' %> d-block"></span>
+            </div>
+            <div class="col text-truncate">
+              <span class="text-body d-block"><%= notification.title %></span>
+              <div class="d-block text-muted text-truncate mt-n1">
+                <%= notification.message %>
+              </div>
+            </div>
+            <div class="col-auto">
+              <% if (notification.isNew) { %>
+                <div class="badge bg-primary">New</div>
+              <% } else { %>
+                <div class="badge">
+                  <%= notification.timestamp.toDateString() === new Date().toDateString() 
+                      ? 'Today' 
+                      : Math.floor((Date.now() - notification.timestamp) / 86400000) + 'd ago' %>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="list-group-item">
+        <div class="row align-items-center">
+          <div class="col text-truncate">
+            <span class="text-muted">No notifications</span>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>

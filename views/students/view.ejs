@@ -1,0 +1,368 @@
+<!-- views/students/view.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head', { title: 'Student Details' }) %>
+<body>
+  <div class="page">
+    <%- include('../partials/navbar') %>
+    <%- include('../partials/sidebar') %>
+    
+    <div class="page-wrapper">
+      <div class="container-xl">
+        <div class="page-header d-print-none">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="page-title">Student Details</h2>
+            </div>
+            <div class="col-auto ms-auto">
+              <div class="btn-list">
+                <% if (user.role === 'admin' || user.role === 'principal' || user.role === 'hod') { %>
+                  <a href="/students/edit/<%= student._id %>" class="btn btn-primary">
+                    <i class="ti ti-edit"></i>
+                    Edit Student
+                  </a>
+                <% } %>
+                <a href="/students" class="btn btn-secondary">
+                  <i class="ti ti-arrow-left"></i>
+                  Back to Students
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="page-body">
+        <div class="container-xl">
+          <%- include('../partials/messages') %>
+          
+          <div class="row row-cards">
+            <div class="col-12 col-lg-4">
+              <div class="card">
+                <div class="card-body p-4 text-center">
+                  <% if (student.photo) { %>
+                    <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(<%= student.photo %>)"></span>
+                  <% } else { %>
+                    <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-color: #206bc4">
+                      <%= student.name.charAt(0).toUpperCase() %>
+                    </span>
+                  <% } %>
+                  <h3 class="m-0 mb-1"><%= student.name %></h3>
+                  <div class="text-muted">
+                    <%= student.admission_no %>
+                    <% if (student.regd_no) { %>
+                      | <%= student.regd_no %>
+                    <% } %>
+                  </div>
+                  <div class="mt-3">
+                    <% if (student.batch_id) { %>
+                      <span class="badge bg-blue-lt">
+                        <%= student.batch_id.batch_name %> (<%= student.batch_id.start_year %>-<%= student.batch_id.end_year %>)
+                      </span>
+                    <% } %>
+                    <% if (student.gender_id) { %>
+                      <span class="badge bg-purple-lt">
+                        <%= student.gender_id.name %>
+                      </span>
+                    <% } %>
+                  </div>
+                </div>
+                <div class="d-flex">
+                  <% if (student.user_id && (user.role === 'admin' || user.role === 'principal' || user.role === 'hod')) { %>
+                    <a href="#" class="card-btn" data-bs-toggle="modal" data-bs-target="#modal-reset-password">
+                      <i class="ti ti-key me-1"></i>
+                      Reset Password
+                    </a>
+                  <% } %>
+                  <% if (user.role === 'admin' || user.role === 'principal' || user.role === 'hod') { %>
+                    <a href="#" class="card-btn text-danger" data-bs-toggle="modal" data-bs-target="#modal-delete">
+                      <i class="ti ti-trash me-1"></i>
+                      Delete
+                    </a>
+                  <% } %>
+                </div>
+              </div>
+              
+              <!-- Contact Information -->
+              <div class="card mt-3">
+                <div class="card-header">
+                  <h3 class="card-title">Contact Information</h3>
+                </div>
+                <div class="card-body">
+                  <% if (student.email) { %>
+                    <div class="mb-2">
+                      <div class="d-flex align-items-center">
+                        <i class="ti ti-mail me-2 text-muted"></i>
+                        <div>
+                          <div class="font-weight-medium"><%= student.email %></div>
+                          <div class="text-muted">Email</div>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                  
+                  <% if (student.mobile) { %>
+                    <div class="mb-2">
+                      <div class="d-flex align-items-center">
+                        <i class="ti ti-phone me-2 text-muted"></i>
+                        <div>
+                          <div class="font-weight-medium"><%= student.mobile %></div>
+                          <div class="text-muted">Mobile</div>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                  
+                  <% if (student.father_name) { %>
+                    <div class="mb-2">
+                      <div class="d-flex align-items-center">
+                        <i class="ti ti-user me-2 text-muted"></i>
+                        <div>
+                          <div class="font-weight-medium"><%= student.father_name %></div>
+                          <div class="text-muted">Father's Name</div>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                  
+                  <% if (student.mother_name) { %>
+                    <div class="mb-2">
+                      <div class="d-flex align-items-center">
+                        <i class="ti ti-user me-2 text-muted"></i>
+                        <div>
+                          <div class="font-weight-medium"><%= student.mother_name %></div>
+                          <div class="text-muted">Mother's Name</div>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-12 col-lg-8">
+              <div class="card">
+                <div class="card-header">
+                  <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
+                    <li class="nav-item">
+                      <a href="#personal" class="nav-link active" data-bs-toggle="tab">Personal Details</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="#academic" class="nav-link" data-bs-toggle="tab">Academic Details</a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="#account" class="nav-link" data-bs-toggle="tab">Account Details</a>
+                    </li>
+                  </ul>
+                </div>
+                <div class="card-body">
+                  <div class="tab-content">
+                    <!-- Personal Details Tab -->
+                    <div class="tab-pane active show" id="personal">
+                      <div class="row">
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Aadhar Number</label>
+                          <div class="form-control-plaintext"><%= student.aadhar || 'Not provided' %></div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Gender</label>
+                          <div class="form-control-plaintext">
+                            <%= student.gender_id ? student.gender_id.name : 'Not specified' %>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Nationality</label>
+                          <div class="form-control-plaintext">
+                            <%= student.nationality_id ? student.nationality_id.name : 'Not specified' %>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Religion</label>
+                          <div class="form-control-plaintext">
+                            <%= student.religion_id ? student.religion_id.name : 'Not specified' %>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Caste</label>
+                          <div class="form-control-plaintext">
+                            <%= student.caste_id ? student.caste_id.name : 'Not specified' %>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Sub Caste</label>
+                          <div class="form-control-plaintext">
+                            <%= student.sub_caste_id ? student.sub_caste_id.name : 'Not specified' %>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Academic Details Tab -->
+                    <div class="tab-pane" id="academic">
+                      <div class="row">
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Admission Number</label>
+                          <div class="form-control-plaintext"><%= student.admission_no %></div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Registration Number</label>
+                          <div class="form-control-plaintext"><%= student.regd_no || 'Not assigned' %></div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Batch</label>
+                          <div class="form-control-plaintext">
+                            <%= student.batch_id ? `${student.batch_id.batch_name} (${student.batch_id.start_year}-${student.batch_id.end_year})` : 'Not assigned' %>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Student Type</label>
+                          <div class="form-control-plaintext">
+                            <%= student.student_type_id ? student.student_type_id.name : 'Not specified' %>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- We can add more academic details like current semester, 
+                           courses enrolled, attendance summary, etc. in future updates -->
+                    </div>
+                    
+                    <!-- Account Details Tab -->
+                    <div class="tab-pane" id="account">
+                      <% if (student.user_id) { %>
+                        <div class="row">
+                          <div class="col-md-6 mb-3">
+                            <label class="form-label">Username</label>
+                            <div class="form-control-plaintext"><%= student.user_id.username %></div>
+                          </div>
+                          
+                          <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <div class="form-control-plaintext"><%= student.user_id.email %></div>
+                          </div>
+                          
+                          <div class="col-md-6 mb-3">
+                            <label class="form-label">Status</label>
+                            <div class="form-control-plaintext">
+                              <% if (student.user_id.is_active) { %>
+                                <span class="badge bg-success">Active</span>
+                              <% } else { %>
+                                <span class="badge bg-danger">Inactive</span>
+                              <% } %>
+                            </div>
+                          </div>
+                          
+                          <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Login</label>
+                            <div class="form-control-plaintext">
+                              <%= student.user_id.last_login ? new Date(student.user_id.last_login).toLocaleString() : 'Never' %>
+                            </div>
+                          </div>
+                          
+                          <% if (user.role === 'admin' || user.role === 'principal' || user.role === 'hod') { %>
+                            <div class="col-12 mt-3">
+                              <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal-reset-password">
+                                <i class="ti ti-key me-1"></i>
+                                Reset Password
+                              </button>
+                            </div>
+                          <% } %>
+                        </div>
+                      <% } else { %>
+                        <div class="empty">
+                          <div class="empty-icon">
+                            <i class="ti ti-user-off"></i>
+                          </div>
+                          <p class="empty-title">No account found</p>
+                          <p class="empty-subtitle text-muted">
+                            This student does not have a user account in the system.
+                          </p>
+                          <% if (user.role === 'admin') { %>
+                            <div class="empty-action">
+                              <a href="/students/edit/<%= student._id %>" class="btn btn-primary">
+                                <i class="ti ti-plus me-1"></i>
+                                Create Account
+                              </a>
+                            </div>
+                          <% } %>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Additional sections like attendance summary, fee status, exam results, etc. can be added here -->
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Reset Password Modal -->
+      <% if (student.user_id) { %>
+        <div class="modal modal-blur fade" id="modal-reset-password" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Reset Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form action="/students/reset-password/<%= student._id %>" method="POST">
+                <div class="modal-body">
+                  <p>Are you sure you want to reset the password for <strong><%= student.name %></strong>?</p>
+                  <p>The password will be reset to the student's admission number (<strong><%= student.admission_no %></strong>).</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-warning ms-auto">
+                    Reset Password
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% } %>
+      
+      <!-- Delete Modal -->
+      <div class="modal modal-blur fade" id="modal-delete" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Delete Student</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure you want to delete <strong><%= student.name %></strong>?</p>
+              <p class="text-danger">This action cannot be undone and will also delete the associated user account if it exists.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                Cancel
+              </button>
+              <form action="/students/delete/<%= student._id %>" method="POST">
+                <button type="submit" class="btn btn-danger ms-auto">
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+  
+  <%- include('../partials/scripts') %>
+</body>
+</html>

@@ -9,10 +9,10 @@ router.get('/login', (req, res) => {
 });
 
 // routes/auth.js - update the login route
-// routes/auth.js (update the login route)
+// routes/auth.js - Enhance login route with remember me functionality
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, remember } = req.body;
     
     // Find user by email
     const user = await User.findOne({ email });
@@ -39,6 +39,11 @@ router.post('/login', async (req, res) => {
       email: user.email,
       role: user.role
     };
+    
+    // Set cookie expiration for "remember me"
+    if (remember) {
+      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+    }
     
     req.flash('success', 'Login successful');
     res.redirect('/dashboard');
@@ -124,4 +129,105 @@ router.post('/register', async (req, res) => {
     res.redirect('/register');
   }
 });
+
+// routes/auth.js - Add password reset routes
+
+// Forgot password form
+router.get('/forgot-password', (req, res) => {
+  res.render('auth/forgot-password');
+});
+
+// Process forgot password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // Find user
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+      req.flash('error', 'No account with that email address exists');
+      return res.redirect('/forgot-password');
+    }
+    
+    // Generate token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    
+    // Set token and expiry
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+    
+    // In a real application, you would send an email here
+    console.log(`Password reset token for ${email}: ${resetToken}`);
+    
+    req.flash('success', 'Password reset instructions have been sent to your email');
+    res.redirect('/login');
+  } catch (err) {
+    console.error('Password reset error:', err);
+    req.flash('error', 'An error occurred');
+    res.redirect('/forgot-password');
+  }
+});
+
+// Reset password form
+router.get('/reset-password/:token', async (req, res) => {
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+    
+    if (!user) {
+      req.flash('error', 'Password reset token is invalid or has expired');
+      return res.redirect('/forgot-password');
+    }
+    
+    res.render('auth/reset-password', {
+      token: req.params.token
+    });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    req.flash('error', 'An error occurred');
+    res.redirect('/forgot-password');
+  }
+});
+
+// Process reset password
+router.post('/reset-password/:token', async (req, res) => {
+  try {
+    const { password, password2 } = req.body;
+    
+    // Validate passwords
+    if (password !== password2) {
+      req.flash('error', 'Passwords do not match');
+      return res.redirect(`/reset-password/${req.params.token}`);
+    }
+    
+    // Find user
+    const user = await User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+    
+    if (!user) {
+      req.flash('error', 'Password reset token is invalid or has expired');
+      return res.redirect('/forgot-password');
+    }
+    
+    // Update password
+    user.password_hash = await bcrypt.hash(password, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+    
+    req.flash('success', 'Your password has been updated. You can now log in');
+    res.redirect('/login');
+  } catch (err) {
+    console.error('Password reset error:', err);
+    req.flash('error', 'An error occurred');
+    res.redirect('/forgot-password');
+  }
+});
+
 module.exports = router;

@@ -1,0 +1,102 @@
+<!-- views/dashboard/partials/principal-stats.ejs -->
+<div class="row row-deck row-cards">
+  <!-- Stats Cards -->
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Total Departments</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.departmentCount || 0 %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Total Faculty</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.facultyCount || 0 %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Total Students</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.studentCount || 0 %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="subheader">Overall Attendance</div>
+        </div>
+        <div class="d-flex align-items-baseline">
+          <div class="h1 mb-0 me-2"><%= stats.overallAttendance || 0 %>%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Principal Department Performance -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Institution Overview</h3>
+      </div>
+      <div class="card-body">
+        <h4>Department Performance</h4>
+        <div class="table-responsive">
+          <table class="table table-vcenter card-table">
+            <thead>
+              <tr>
+                <th>Department</th>
+                <th>HOD</th>
+                <th>Faculty Count</th>
+                <th>Student Count</th>
+                <th>Avg. Attendance</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (stats.departments && stats.departments.length > 0) { %>
+                <% stats.departments.forEach(dept => { %>
+                  <tr>
+                    <td><%= dept.name %></td>
+                    <td><%= dept.hod %></td>
+                    <td><%= dept.facultyCount %></td>
+                    <td><%= dept.studentCount %></td>
+                    <td>
+                      <div class="text-<%= dept.attendance >= 85 ? 'success' : (dept.attendance >= 75 ? 'warning' : 'danger') %>">
+                        <%= dept.attendance %>%
+                      </div>
+                    </td>
+                    <td>
+                      <a href="#" class="btn btn-sm btn-primary">View Details</a>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" class="text-center">No department data available</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

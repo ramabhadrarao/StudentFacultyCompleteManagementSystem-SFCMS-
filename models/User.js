@@ -1,3 +1,4 @@
+// models/User.js - Add password reset fields
 const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   username: { type: String, unique: true, required: true },
@@ -9,6 +10,8 @@ const userSchema = new mongoose.Schema({
     default: 'student'
   },
   is_active: { type: Boolean, default: true },
-  last_login: { type: Date }
+  last_login: { type: Date },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
 }, { timestamps: true });
 module.exports = mongoose.model('User', userSchema);

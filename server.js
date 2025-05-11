@@ -1,4 +1,4 @@
-// server.js (updated)
+// server.js
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -52,26 +52,53 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes - Only include routes that exist
+// Import routes
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
-
 const profileRoutes = require('./routes/profile');
+const adminUserRoutes = require('./routes/admin/users');
+const studentRoutes = require('./routes/students');
+
+// Apply routes
 app.use('/', authRoutes);
 app.use('/dashboard', dashboardRoutes);
-
 app.use('/profile', profileRoutes);
-
+app.use('/admin/users', adminUserRoutes);
+app.use('/students', studentRoutes);
 
 // Home route
 app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
+// Create uploads directories if they don't exist
+const fs = require('fs');
+const uploadDirs = [
+  './public/uploads',
+  './public/uploads/students',
+  './public/uploads/faculty',
+  './public/uploads/documents',
+  './public/uploads/certificates'
+];
+
+uploadDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`Created directory: ${dir}`);
+  }
+});
+
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke! ' + (process.env.NODE_ENV === 'development' ? err.message : ''));
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).render('errors/404', {
+    title: 'Page Not Found'
+  });
 });
 
 // Start server

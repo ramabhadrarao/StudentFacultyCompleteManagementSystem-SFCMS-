@@ -1,8 +1,13 @@
 <!-- views/partials/scripts.ejs -->
 <script src="https://unpkg.com/@tabler/core@latest/dist/js/tabler.min.js"></script>
 <script>
-  // Add any custom JavaScript here
   document.addEventListener('DOMContentLoaded', function() {
-    // Initialize any components that need JavaScript
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+    
+    // Add any other JavaScript initialization here
   });
 </script>

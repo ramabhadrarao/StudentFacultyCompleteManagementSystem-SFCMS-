@@ -1,0 +1,29 @@
+<!-- views/partials/page-header.ejs -->
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle">
+          <%= typeof pretitle !== 'undefined' ? pretitle : 'Overview' %>
+        </div>
+        <h2 class="page-title">
+          <%= typeof pageTitle !== 'undefined' ? pageTitle : 'Dashboard' %>
+        </h2>
+      </div>
+      <div class="col-auto ms-auto">
+        <div class="btn-list">
+          <span class="d-none d-sm-inline">
+            <a href="/help" class="btn">
+              <i class="ti ti-help me-1"></i>
+              Help
+            </a>
+          </span>
+          <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-report">
+            <i class="ti ti-file-report me-1"></i>
+            Generate Report
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

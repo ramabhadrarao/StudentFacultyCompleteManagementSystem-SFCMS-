@@ -1,21 +1,10 @@
-// routes/dashboard.js - Fix this file
+// routes/dashboard.js
 const express = require('express');
 const router = express.Router();
+const dashboardController = require('../controllers/dashboardController');
 const { isAuthenticated } = require('../middleware/auth');
 
-// Dashboard home
-router.get('/', isAuthenticated, (req, res) => {
-  try {
-    // Use a single dashboard file instead of trying to render different files based on role
-    res.render('dashboard/index', {
-      title: 'Dashboard',
-      user: req.session.user
-    });
-  } catch (err) {
-    console.error('Dashboard error:', err);
-    req.flash('error', 'Failed to load dashboard');
-    res.redirect('/login');
-  }
-});
+// Dashboard home - apply authentication middleware
+router.get('/', isAuthenticated, dashboardController.index);
 
 module.exports = router;
