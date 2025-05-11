@@ -1,0 +1,12 @@
+<%- include('../../master/generic-index', { 
+      title: 'Religion Management',
+      modelName: 'religion',
+      displayName: 'Religion',
+      items: items || [],
+      listFields: listFields || ['name'],
+      requiredFields: requiredFields || ['name'],
+      relatedModels: relatedModels || [],
+      relatedData: relatedData || {},
+      searchTerm: searchTerm || '',
+      pagination: pagination || { page: 1, limit: 10, total: 0, pages: 0 }
+    }) %>
