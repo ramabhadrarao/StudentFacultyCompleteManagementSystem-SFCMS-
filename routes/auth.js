@@ -8,26 +8,41 @@ router.get('/login', (req, res) => {
   res.render('auth/login');
 });
 
-// Handle login
+// routes/auth.js - update the login route
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
-  if (!user) {
-    req.flash('error', 'User not found');
-    return res.redirect('/login');
-  }
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      req.flash('error', 'Invalid credentials');
+      return res.redirect('/login');
+    }
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    req.flash('error', 'Incorrect password');
-    return res.redirect('/login');
-  }
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+    if (!isMatch) {
+      req.flash('error', 'Invalid credentials');
+      return res.redirect('/login');
+    }
 
-  req.session.user = user;
-  req.flash('success', 'Login successful');
-  res.redirect('/dashboard');
+    // Update last login time
+    user.last_login = new Date();
+    await user.save();
+
+    req.session.user = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    };
+    
+    req.flash('success', 'Login successful');
+    res.redirect('/dashboard');
+  } catch (err) {
+    console.error('Login error:', err);
+    req.flash('error', 'An error occurred during login');
+    res.redirect('/login');
+  }
 });
-
 // Logout
 router.get('/logout', (req, res) => {
   req.session.destroy();
