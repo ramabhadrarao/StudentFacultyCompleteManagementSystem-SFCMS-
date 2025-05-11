@@ -7,28 +7,45 @@ const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
 const path = require('path');
 const methodOverride = require('method-override');
+const fs = require('fs');
 
 const app = express();
 
-// Start replica set first
+// Create uploads directories if they don't exist
+const uploadDirs = [
+  './public/uploads',
+  './public/uploads/students',
+  './public/uploads/faculty',
+  './public/uploads/documents',
+  './public/uploads/certificates'
+];
+
+uploadDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`Created directory: ${dir}`);
+  }
+});
+
+// DB connect - try-catch for flexibility during development
 try {
-  require('./start-mongodb');
+  // DB connect
+  const { connectDB } = require('./config/db');
+  connectDB();
 } catch (err) {
-  console.warn('Warning: Could not start MongoDB replica set automatically:', err.message);
-  console.warn('Make sure MongoDB is running before proceeding');
+  console.error('MongoDB connection error:', err.message);
+  console.log('Will attempt to continue without database connection.');
 }
 
-// DB connect
-const { connectDB } = require('./config/db');
-connectDB(); // ensure called after replica starts
-
-// Sessions (must use connected client)
+// Sessions
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'fallback_secret_key_for_dev',
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    client: mongoose.connection.getClient(),
+    mongoUrl: process.env.MONGO_URI || 'mongodb://localhost:27017/college_db',
+    ttl: 14 * 24 * 60 * 60, // 14 days
+    autoRemove: 'native'
   }),
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 // 1 day
@@ -69,23 +86,6 @@ app.use('/students', studentRoutes);
 // Home route
 app.get('/', (req, res) => {
   res.redirect('/login');
-});
-
-// Create uploads directories if they don't exist
-const fs = require('fs');
-const uploadDirs = [
-  './public/uploads',
-  './public/uploads/students',
-  './public/uploads/faculty',
-  './public/uploads/documents',
-  './public/uploads/certificates'
-];
-
-uploadDirs.forEach(dir => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-    console.log(`Created directory: ${dir}`);
-  }
 });
 
 // Error handler

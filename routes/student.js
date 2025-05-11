@@ -3,96 +3,8 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const studentController = require('../controllers/studentController');
 const { isAuthenticated, hasRole } = require('../middleware/auth');
-
-// Temporary fix: Create placeholder controller functions
-// Later you can replace these with your actual controller implementation
-const studentController = {
-  getStudents: (req, res) => {
-    res.render('students/index', {
-      title: 'Student Management',
-      students: [],
-      batches: [],
-      selectedBatch: '',
-      searchName: '',
-      searchAdmission: '',
-      pagination: {
-        page: 1,
-        limit: 10,
-        total: 0,
-        pages: 0
-      }
-    });
-  },
-  getStudentById: (req, res) => {
-    res.render('students/view', {
-      title: 'Student Details',
-      student: null
-    });
-  },
-  createStudentForm: (req, res) => {
-    res.render('students/create', {
-      title: 'Add Student',
-      batches: [],
-      genders: [],
-      nationalities: [],
-      religions: [],
-      studentTypes: [],
-      castes: [],
-      subcastes: []
-    });
-  },
-  createStudent: (req, res) => {
-    req.flash('success', 'Student would be created here');
-    res.redirect('/students');
-  },
-  editStudentForm: (req, res) => {
-    res.render('students/edit', {
-      title: 'Edit Student',
-      student: null,
-      batches: [],
-      genders: [],
-      nationalities: [],
-      religions: [],
-      studentTypes: [],
-      castes: [],
-      subcastes: []
-    });
-  },
-  updateStudent: (req, res) => {
-    req.flash('success', 'Student would be updated here');
-    res.redirect('/students');
-  },
-  deleteStudent: (req, res) => {
-    req.flash('success', 'Student would be deleted here');
-    res.redirect('/students');
-  },
-  importStudentsForm: (req, res) => {
-    res.render('students/import', {
-      title: 'Import Students'
-    });
-  },
-  importStudents: (req, res) => {
-    req.flash('success', 'Students would be imported here');
-    res.redirect('/students/import/result');
-  },
-  importResult: (req, res) => {
-    res.render('students/import-result', {
-      title: 'Import Results',
-      errors: []
-    });
-  },
-  exportStudents: (req, res) => {
-    res.send('Student export functionality would be here');
-  },
-  resetPassword: (req, res) => {
-    req.flash('success', 'Password would be reset here');
-    res.redirect('/students');
-  },
-  getSubcastesByCaste: (req, res) => {
-    res.json([]);
-  }
-};
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -134,6 +46,131 @@ const csvUpload = multer({
     }
   }
 });
+
+// Define studentController methods if they don't exist
+// This is temporary and should be replaced with proper implementation later
+if (!studentController.getStudents) {
+  studentController.getStudents = (req, res) => {
+    res.render('students/index', {
+      title: 'Student Management',
+      students: [],
+      batches: [],
+      selectedBatch: '',
+      searchName: '',
+      searchAdmission: '',
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        pages: 0
+      }
+    });
+  };
+}
+
+if (!studentController.getStudentById) {
+  studentController.getStudentById = (req, res) => {
+    res.render('students/view', {
+      title: 'Student Details',
+      student: {}
+    });
+  };
+}
+
+if (!studentController.createStudentForm) {
+  studentController.createStudentForm = (req, res) => {
+    res.render('students/create', {
+      title: 'Add Student',
+      batches: [],
+      genders: [],
+      nationalities: [],
+      religions: [],
+      studentTypes: [],
+      castes: [],
+      subcastes: []
+    });
+  };
+}
+
+if (!studentController.createStudent) {
+  studentController.createStudent = (req, res) => {
+    req.flash('success', 'Student would be created here');
+    res.redirect('/students');
+  };
+}
+
+if (!studentController.editStudentForm) {
+  studentController.editStudentForm = (req, res) => {
+    res.render('students/edit', {
+      title: 'Edit Student',
+      student: {},
+      batches: [],
+      genders: [],
+      nationalities: [],
+      religions: [],
+      studentTypes: [],
+      castes: [],
+      subcastes: []
+    });
+  };
+}
+
+if (!studentController.updateStudent) {
+  studentController.updateStudent = (req, res) => {
+    req.flash('success', 'Student would be updated here');
+    res.redirect('/students');
+  };
+}
+
+if (!studentController.deleteStudent) {
+  studentController.deleteStudent = (req, res) => {
+    req.flash('success', 'Student would be deleted here');
+    res.redirect('/students');
+  };
+}
+
+if (!studentController.importStudentsForm) {
+  studentController.importStudentsForm = (req, res) => {
+    res.render('students/import', {
+      title: 'Import Students'
+    });
+  };
+}
+
+if (!studentController.importStudents) {
+  studentController.importStudents = (req, res) => {
+    req.flash('success', 'Students would be imported here');
+    res.redirect('/students/import/result');
+  };
+}
+
+if (!studentController.importResult) {
+  studentController.importResult = (req, res) => {
+    res.render('students/import-result', {
+      title: 'Import Results',
+      errors: []
+    });
+  };
+}
+
+if (!studentController.exportStudents) {
+  studentController.exportStudents = (req, res) => {
+    res.send('Student export functionality would be here');
+  };
+}
+
+if (!studentController.resetPassword) {
+  studentController.resetPassword = (req, res) => {
+    req.flash('success', 'Password would be reset here');
+    res.redirect('/students');
+  };
+}
+
+if (!studentController.getSubcastesByCaste) {
+  studentController.getSubcastesByCaste = (req, res) => {
+    res.json([]);
+  };
+}
 
 // Routes accessible by admin, principal, hod, and faculty
 router.get('/', hasRole(['admin', 'principal', 'hod', 'faculty']), studentController.getStudents);

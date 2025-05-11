@@ -1,98 +1,128 @@
-// Seed SubCaste data
-const seedSubCastes = async (castes) => {
+const mongoose = require('mongoose');
+require('dotenv').config();
+
+const connectDB = async () => {
   try {
-    await SubCaste.deleteMany({});
-    
-    if (!castes || castes.length === 0) {
-      console.log('No castes found, skipping subcaste seeding');
-      return;
-    }
-    
-    // Get caste IDs by name
-    const generalCaste = castes.find(caste => caste.name === 'General');
-    const obcCaste = castes.find(caste => caste.name === 'Other Backward Class');
-    const scCaste = castes.find(caste => caste.name === 'Scheduled Caste');
-    const stCaste = castes.find(caste => caste.name === 'Scheduled Tribe');
-    
-    // Example subcastes for each caste category
-    const subcastes = [];
-    
-    // General subcastes (examples)
-    if (generalCaste) {
-      subcastes.push(
-        { name: 'Brahmin', caste_id: generalCaste._id },
-        { name: 'Kshatriya', caste_id: generalCaste._id },
-        { name: 'Vaishya', caste_id: generalCaste._id },
-        { name: 'Others', caste_id: generalCaste._id }
-      );
-    }
-    
-    // OBC subcastes (examples)
-    if (obcCaste) {
-      subcastes.push(
-        { name: 'Yadav', caste_id: obcCaste._id },
-        { name: 'Kurmi', caste_id: obcCaste._id },
-        { name: 'Teli', caste_id: obcCaste._id },
-        { name: 'Others', caste_id: obcCaste._id }
-      );
-    }
-    
-    // SC subcastes (examples)
-    if (scCaste) {
-      subcastes.push(
-        { name: 'Chamar', caste_id: scCaste._id },
-        { name: 'Dhobi', caste_id: scCaste._id },
-        { name: 'Pasi', caste_id: scCaste._id },
-        { name: 'Others', caste_id: scCaste._id }
-      );
-    }
-    
-    // ST subcastes (examples)
-    if (stCaste) {
-      subcastes.push(
-        { name: 'Gond', caste_id: stCaste._id },
-        { name: 'Santhal', caste_id: stCaste._id },
-        { name: 'Bhil', caste_id: stCaste._id },
-        { name: 'Others', caste_id: stCaste._id }
-      );
-    }
-    
-    await SubCaste.insertMany(subcastes);
-    console.log('SubCaste data seeded successfully');
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/college_db');
+    console.log('✅ MongoDB connected');
   } catch (err) {
-    console.error('Error seeding subcaste data:', err);
+    console.error('❌ MongoDB connection failed:', err);
+    process.exit(1);
   }
 };
 
-// Run all seed functions
+// Import models
+const Gender = require('../models/Gender');
+const Nationality = require('../models/Nationality');
+const Religion = require('../models/Religion');
+const StudentType = require('../models/StudentType');
+const Caste = require('../models/Caste');
+const SubCaste = require('../models/SubCaste');
+
+// Seed Genders
+const seedGenders = async () => {
+  await Gender.deleteMany({});
+  await Gender.insertMany([
+    { name: 'Male' },
+    { name: 'Female' },
+    { name: 'Other' }
+  ]);
+  console.log('✅ Gender data seeded');
+};
+
+// Seed Nationalities
+const seedNationalities = async () => {
+  await Nationality.deleteMany({});
+  await Nationality.insertMany([
+    { name: 'Indian' },
+    { name: 'American' },
+    { name: 'British' },
+    { name: 'Other' }
+  ]);
+  console.log('✅ Nationality data seeded');
+};
+
+// Seed Religions
+const seedReligions = async () => {
+  await Religion.deleteMany({});
+  await Religion.insertMany([
+    { name: 'Hindu' },
+    { name: 'Muslim' },
+    { name: 'Christian' },
+    { name: 'Sikh' },
+    { name: 'Other' }
+  ]);
+  console.log('✅ Religion data seeded');
+};
+
+// Seed Student Types
+const seedStudentTypes = async () => {
+  await StudentType.deleteMany({});
+  await StudentType.insertMany([
+    { name: 'Regular' },
+    { name: 'Lateral Entry' },
+    { name: 'Transfer' }
+  ]);
+  console.log('✅ StudentType data seeded');
+};
+
+// Seed Castes and SubCastes
+const seedCastesAndSubCastes = async () => {
+  await Caste.deleteMany({});
+  await SubCaste.deleteMany({});
+
+  const casteDocs = await Caste.insertMany([
+    { name: 'General' },
+    { name: 'Other Backward Class' },
+    { name: 'Scheduled Caste' },
+    { name: 'Scheduled Tribe' }
+  ]);
+
+  const findCaste = (name) => casteDocs.find(c => c.name === name);
+
+  const subcastes = [
+    // General
+    { name: 'Brahmin', caste_id: findCaste('General')._id },
+    { name: 'Kshatriya', caste_id: findCaste('General')._id },
+    { name: 'Vaishya', caste_id: findCaste('General')._id },
+    { name: 'Others', caste_id: findCaste('General')._id },
+
+    // OBC
+    { name: 'Yadav', caste_id: findCaste('Other Backward Class')._id },
+    { name: 'Kurmi', caste_id: findCaste('Other Backward Class')._id },
+    { name: 'Teli', caste_id: findCaste('Other Backward Class')._id },
+    { name: 'Others', caste_id: findCaste('Other Backward Class')._id },
+
+    // SC
+    { name: 'Chamar', caste_id: findCaste('Scheduled Caste')._id },
+    { name: 'Dhobi', caste_id: findCaste('Scheduled Caste')._id },
+    { name: 'Pasi', caste_id: findCaste('Scheduled Caste')._id },
+    { name: 'Others', caste_id: findCaste('Scheduled Caste')._id },
+
+    // ST
+    { name: 'Gond', caste_id: findCaste('Scheduled Tribe')._id },
+    { name: 'Santhal', caste_id: findCaste('Scheduled Tribe')._id },
+    { name: 'Bhil', caste_id: findCaste('Scheduled Tribe')._id },
+    { name: 'Others', caste_id: findCaste('Scheduled Tribe')._id }
+  ];
+
+  await SubCaste.insertMany(subcastes);
+  console.log('✅ Caste and SubCaste data seeded');
+};
+
+// Main Seed Function
 const seedAll = async () => {
   await connectDB();
-  
-  // Seed independent lookup tables
   await seedGenders();
   await seedNationalities();
   await seedReligions();
   await seedStudentTypes();
-  
-  // Seed dependent lookup tables (caste -> subcaste)
-  const castes = await seedCastes();
-  await seedSubCastes(castes);
-  
-  console.log('All lookup data seeded successfully');
+  await seedCastesAndSubCastes();
+  console.log('🌱 All lookup data seeded successfully');
   process.exit(0);
 };
 
-// Execute the seeding if this file is run directly
+// Run if executed directly
 if (require.main === module) {
   seedAll();
 }
-
-module.exports = {
-  seedAll,
-  seedGenders,
-  seedNationalities,
-  seedReligions,
-  seedStudentTypes,
-  seedCastes,
-  seedSubCastes
-};
