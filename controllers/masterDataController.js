@@ -8,7 +8,7 @@ const Caste = require('../models/Caste');
 const SubCaste = require('../models/SubCaste');
 const Program = require('../models/Program');
 const Department = require('../models/Department');
-
+const College = require('../models/College'); 
 /**
  * Common methods for CRUD operations on master data models
  * @param {Object} model - The Mongoose model
@@ -285,7 +285,10 @@ exports.departmentController = createCrudMethods(Department, {
   displayName: 'Department',
   searchFields: ['department_name', 'department_code'],
   requiredFields: ['department_name', 'department_code'],
-  listFields: ['department_name', 'department_code']
+  listFields: ['department_name', 'department_code','college_id'],
+  relatedModels: { 
+    'college_id': College
+  }
 });
 
 exports.programController = createCrudMethods(Program, {

@@ -1,12 +1,12 @@
-<!-- Here are the minimum files you need to create: -->
-
-<!-- 1. Create views/master/program/index.ejs -->
+<!-- views/master/program/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
 <%- include('../../partials/head', { title: 'Program Management' }) %>
 <body>
   <div class="page">
     <%- include('../../partials/navbar') %>
     <%- include('../../partials/sidebar') %>
-    
+
     <div class="page-wrapper">
       <div class="container-xl">
         <div class="page-header d-print-none">
@@ -25,11 +25,11 @@
           </div>
         </div>
       </div>
-      
+
       <div class="page-body">
         <div class="container-xl">
           <%- include('../../partials/messages') %>
-          
+
           <!-- Data table -->
           <div class="card">
             <div class="card-body">
@@ -44,9 +44,37 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td colspan="4" class="text-center">Program management will be available soon.</td>
-                    </tr>
+                    <% if (!locals.items || locals.items.length === 0) { %>
+                      <tr>
+                        <td colspan="4" class="text-center">No programs found</td>
+                      </tr>
+                    <% } else { %>
+                      <% locals.items.forEach(item => { %>
+                        <tr>
+                          <td><%= item.program_name %></td>
+                          <td><%= item.program_code %></td>
+                          <td><%= item.department_id ? item.department_id.department_name : 'N/A' %></td>
+                          <td>
+                            <div class="btn-list flex-nowrap">
+                              <button type="button" class="btn btn-sm btn-primary edit-btn"
+                                      data-id="<%= item._id %>"
+                                      data-program_name="<%= item.program_name %>"
+                                      data-program_code="<%= item.program_code %>"
+                                      data-department_id="<%= item.department_id ? item.department_id._id : '' %>"
+                                      data-bs-toggle="modal" data-bs-target="#modal-edit">
+                                <i class="ti ti-edit"></i>
+                              </button>
+                              <button type="button" class="btn btn-sm btn-danger delete-btn"
+                                      data-id="<%= item._id %>"
+                                      data-name="<%= item.program_name %>"
+                                      data-bs-toggle="modal" data-bs-target="#modal-delete">
+                                <i class="ti ti-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    <% } %>
                   </tbody>
                 </table>
               </div>
@@ -54,498 +82,83 @@
           </div>
         </div>
       </div>
-      
+
       <%- include('../../partials/footer') %>
     </div>
   </div>
-  
-  <%- include('../../partials/scripts') %>
-</body>
 
-<!-- 2. Create views/master/department/index.ejs -->
-<%- include('../../partials/head', { title: 'Department Management' }) %>
-<body>
-  <div class="page">
-    <%- include('../../partials/navbar') %>
-    <%- include('../../partials/sidebar') %>
-    
-    <div class="page-wrapper">
-      <div class="container-xl">
-        <div class="page-header d-print-none">
-          <div class="row align-items-center">
-            <div class="col">
-              <h2 class="page-title">Department Management</h2>
+  <!-- Add Modal -->
+  <div class="modal modal-blur fade" id="modal-add" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <form action="/master/program" method="POST">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Program</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label required">Program Name</label>
+              <input type="text" class="form-control" name="program_name" required>
             </div>
-            <div class="col-auto ms-auto">
-              <div class="btn-list">
-                <button type="button" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-add">
-                  <i class="ti ti-plus"></i>
-                  Add Department
-                </button>
-              </div>
+            <div class="mb-3">
+              <label class="form-label required">Program Code</label>
+              <input type="text" class="form-control" name="program_code" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label required">Department</label>
+              <select class="form-select" name="department_id" required>
+                <option value="">Select Department</option>
+                <% if (locals.relatedData && locals.relatedData.department_id) { %>
+                  <% locals.relatedData.department_id.forEach(option => { %>
+                    <option value="<%= option._id %>"><%= option.department_name %></option>
+                  <% }) %>
+                <% } %>
+              </select>
             </div>
           </div>
-        </div>
-      </div>
-      
-      <div class="page-body">
-        <div class="container-xl">
-          <%- include('../../partials/messages') %>
-          
-          <!-- Data table -->
-          <div class="card">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-vcenter table-hover card-table">
-                  <thead>
-                    <tr>
-                      <th>Department Name</th>
-                      <th>Department Code</th>
-                      <th>College</th>
-                      <th class="w-1">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td colspan="4" class="text-center">Department management will be available soon.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary ms-auto">
+              <i class="ti ti-plus me-1"></i>
+              Create Program
+            </button>
           </div>
-        </div>
+        </form>
       </div>
-      
-      <%- include('../../partials/footer') %>
     </div>
   </div>
-  
-  <%- include('../../partials/scripts') %>
-</body>
 
-<!-- 3. Create views/master/batch/index.ejs -->
-<%- include('../../partials/head', { title: 'Batch Management' }) %>
-<body>
-  <div class="page">
-    <%- include('../../partials/navbar') %>
-    <%- include('../../partials/sidebar') %>
-    
-    <div class="page-wrapper">
-      <div class="container-xl">
-        <div class="page-header d-print-none">
-          <div class="row align-items-center">
-            <div class="col">
-              <h2 class="page-title">Batch Management</h2>
-            </div>
-            <div class="col-auto ms-auto">
-              <div class="btn-list">
-                <button type="button" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-add">
-                  <i class="ti ti-plus"></i>
-                  Add Batch
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="page-body">
-        <div class="container-xl">
-          <%- include('../../partials/messages') %>
-          
-          <!-- Data table -->
-          <div class="card">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-vcenter table-hover card-table">
-                  <thead>
-                    <tr>
-                      <th>Batch Name</th>
-                      <th>Start Year</th>
-                      <th>End Year</th>
-                      <th>Program</th>
-                      <th class="w-1">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td colspan="5" class="text-center">Batch management will be available soon.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <%- include('../../partials/footer') %>
-    </div>
-  </div>
-  
   <%- include('../../partials/scripts') %>
-</body>
 
-<!-- 4. Create simple placeholder files for the remaining views -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.edit-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          const name = this.getAttribute('data-program_name');
+          const code = this.getAttribute('data-program_code');
+          const dept = this.getAttribute('data-department_id');
 
-<!-- 5. Create views/master/gender/index.ejs -->
-<%- include('../../partials/head', { title: 'Gender Management' }) %>
-<body>
-  <div class="page">
-    <%- include('../../partials/navbar') %>
-    <%- include('../../partials/sidebar') %>
-    
-    <div class="page-wrapper">
-      <div class="container-xl">
-        <div class="page-header d-print-none">
-          <div class="row align-items-center">
-            <div class="col">
-              <h2 class="page-title">Gender Management</h2>
-            </div>
-            <div class="col-auto ms-auto">
-              <div class="btn-list">
-                <button type="button" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-add">
-                  <i class="ti ti-plus"></i>
-                  Add Gender
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="page-body">
-        <div class="container-xl">
-          <%- include('../../partials/messages') %>
-          
-          <!-- Data table -->
-          <div class="card">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-vcenter table-hover card-table">
-                  <thead>
-                    <tr>
-                      <th>Gender Name</th>
-                      <th class="w-1">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td colspan="2" class="text-center">Gender management will be available soon.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <%- include('../../partials/footer') %>
-    </div>
-  </div>
-  
-  <%- include('../../partials/scripts') %>
-</body>
+          document.querySelector('#edit-form').action = '/master/program/update/' + id;
+          document.querySelector('#edit-program_name').value = name;
+          document.querySelector('#edit-program_code').value = code;
+          document.querySelector('#edit-department_id').value = dept;
+        });
+      });
 
-<!-- 6. Create views/master/nationality/index.ejs -->
-<%- include('../../partials/head', { title: 'Nationality Management' }) %>
-<body>
-  <div class="page">
-    <%- include('../../partials/navbar') %>
-    <%- include('../../partials/sidebar') %>
-    
-    <div class="page-wrapper">
-      <div class="container-xl">
-        <div class="page-header d-print-none">
-          <div class="row align-items-center">
-            <div class="col">
-              <h2 class="page-title">Nationality Management</h2>
-            </div>
-            <div class="col-auto ms-auto">
-              <div class="btn-list">
-                <button type="button" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-add">
-                  <i class="ti ti-plus"></i>
-                  Add Nationality
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="page-body">
-        <div class="container-xl">
-          <%- include('../../partials/messages') %>
-          
-          <!-- Data table -->
-          <div class="card">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-vcenter table-hover card-table">
-                  <thead>
-                    <tr>
-                      <th>Nationality Name</th>
-                      <th class="w-1">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td colspan="2" class="text-center">Nationality management will be available soon.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <%- include('../../partials/footer') %>
-    </div>
-  </div>
-  
-  <%- include('../../partials/scripts') %>
-</body>
+      document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          const name = this.getAttribute('data-name');
 
-<!-- 7. Create views/master/religion/index.ejs -->
-<%- include('../../partials/head', { title: 'Religion Management' }) %>
-<body>
-  <div class="page">
-    <%- include('../../partials/navbar') %>
-    <%- include('../../partials/sidebar') %>
-    
-    <div class="page-wrapper">
-      <div class="container-xl">
-        <div class="page-header d-print-none">
-          <div class="row align-items-center">
-            <div class="col">
-              <h2 class="page-title">Religion Management</h2>
-            </div>
-            <div class="col-auto ms-auto">
-              <div class="btn-list">
-                <button type="button" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-add">
-                  <i class="ti ti-plus"></i>
-                  Add Religion
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="page-body">
-        <div class="container-xl">
-          <%- include('../../partials/messages') %>
-          
-          <!-- Data table -->
-          <div class="card">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-vcenter table-hover card-table">
-                  <thead>
-                    <tr>
-                      <th>Religion Name</th>
-                      <th class="w-1">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td colspan="2" class="text-center">Religion management will be available soon.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <%- include('../../partials/footer') %>
-    </div>
-  </div>
-  
-  <%- include('../../partials/scripts') %>
+          document.querySelector('#delete-form').action = '/master/program/delete/' + id;
+          document.querySelector('#delete-name').textContent = name;
+        });
+      });
+    });
+  </script>
 </body>
-
-<!-- 8. Create views/master/studenttype/index.ejs -->
-<%- include('../../partials/head', { title: 'Student Type Management' }) %>
-<body>
-  <div class="page">
-    <%- include('../../partials/navbar') %>
-    <%- include('../../partials/sidebar') %>
-    
-    <div class="page-wrapper">
-      <div class="container-xl">
-        <div class="page-header d-print-none">
-          <div class="row align-items-center">
-            <div class="col">
-              <h2 class="page-title">Student Type Management</h2>
-            </div>
-            <div class="col-auto ms-auto">
-              <div class="btn-list">
-                <button type="button" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-add">
-                  <i class="ti ti-plus"></i>
-                  Add Student Type
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="page-body">
-        <div class="container-xl">
-          <%- include('../../partials/messages') %>
-          
-          <!-- Data table -->
-          <div class="card">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-vcenter table-hover card-table">
-                  <thead>
-                    <tr>
-                      <th>Student Type Name</th>
-                      <th class="w-1">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td colspan="2" class="text-center">Student type management will be available soon.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <%- include('../../partials/footer') %>
-    </div>
-  </div>
-  
-  <%- include('../../partials/scripts') %>
-</body>
-
-<!-- 9. Create views/master/caste/index.ejs -->
-<%- include('../../partials/head', { title: 'Caste Management' }) %>
-<body>
-  <div class="page">
-    <%- include('../../partials/navbar') %>
-    <%- include('../../partials/sidebar') %>
-    
-    <div class="page-wrapper">
-      <div class="container-xl">
-        <div class="page-header d-print-none">
-          <div class="row align-items-center">
-            <div class="col">
-              <h2 class="page-title">Caste Management</h2>
-            </div>
-            <div class="col-auto ms-auto">
-              <div class="btn-list">
-                <button type="button" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-add">
-                  <i class="ti ti-plus"></i>
-                  Add Caste
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="page-body">
-        <div class="container-xl">
-          <%- include('../../partials/messages') %>
-          
-          <!-- Data table -->
-          <div class="card">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-vcenter table-hover card-table">
-                  <thead>
-                    <tr>
-                      <th>Caste Name</th>
-                      <th class="w-1">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td colspan="2" class="text-center">Caste management will be available soon.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <%- include('../../partials/footer') %>
-    </div>
-  </div>
-  
-  <%- include('../../partials/scripts') %>
-</body>
-
-<!-- 10. Create views/master/subcaste/index.ejs -->
-<%- include('../../partials/head', { title: 'Sub Caste Management' }) %>
-<body>
-  <div class="page">
-    <%- include('../../partials/navbar') %>
-    <%- include('../../partials/sidebar') %>
-    
-    <div class="page-wrapper">
-      <div class="container-xl">
-        <div class="page-header d-print-none">
-          <div class="row align-items-center">
-            <div class="col">
-              <h2 class="page-title">Sub Caste Management</h2>
-            </div>
-            <div class="col-auto ms-auto">
-              <div class="btn-list">
-                <button type="button" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-add">
-                  <i class="ti ti-plus"></i>
-                  Add Sub Caste
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="page-body">
-        <div class="container-xl">
-          <%- include('../../partials/messages') %>
-          
-          <!-- Data table -->
-          <div class="card">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-vcenter table-hover card-table">
-                  <thead>
-                    <tr>
-                      <th>Sub Caste Name</th>
-                      <th>Caste</th>
-                      <th class="w-1">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td colspan="3" class="text-center">Sub caste management will be available soon.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <%- include('../../partials/footer') %>
-    </div>
-  </div>
-  
-  <%- include('../../partials/scripts') %>
-</body>
+</html>

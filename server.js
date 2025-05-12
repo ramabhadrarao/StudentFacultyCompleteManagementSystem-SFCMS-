@@ -74,8 +74,12 @@ const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
 const profileRoutes = require('./routes/profile');
 const adminUserRoutes = require('./routes/admin/users');
+const adminRolesRoutes = require('./routes/admin/roles');
+const adminSettingsRoutes = require('./routes/admin/settings');
 const studentRoutes = require('./routes/students');
 const masterRoutes = require('./routes/master');
+const masterCollegeRoutes = require('./routes/master/college');
+
 
 // Apply routes
 app.use('/', authRoutes);
@@ -84,6 +88,10 @@ app.use('/profile', profileRoutes);
 app.use('/admin/users', adminUserRoutes);
 app.use('/students', studentRoutes);
 app.use('/master', masterRoutes);
+app.use('/admin/roles', adminRolesRoutes);
+app.use('/admin/settings', adminSettingsRoutes);
+app.use('/master/college', masterCollegeRoutes);
+
 // Home route
 app.get('/', (req, res) => {
   res.redirect('/login');
