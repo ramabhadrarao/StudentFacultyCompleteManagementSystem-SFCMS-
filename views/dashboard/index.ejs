@@ -4,7 +4,6 @@
 <%- include('../partials/head', { title: 'Dashboard' }) %>
 <body>
   <div class="page">
-    <!-- Include navbar and sidebar instead of header and navigation -->
     <%- include('../partials/navbar') %>
     <%- include('../partials/sidebar') %>
     
@@ -35,9 +34,9 @@
               <div class="card-body">
                 <div class="row align-items-center">
                   <div class="col-10">
-                    <h3 class="h1">Welcome, <%= user.username %></h3>
+                    <h3 class="h1">Welcome, <%= user ? user.username : 'Guest' %></h3>
                     <div class="markdown text-muted">
-                      You are logged in as <strong><%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %></strong>. Use the navigation to access various features of the College ERP System.
+                      You are logged in as <strong><%= user ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '' %></strong>. Use the navigation to access various features of the College ERP System.
                     </div>
                     <div class="mt-3">
                       <a href="/profile" class="btn btn-primary">View Profile</a>
@@ -48,128 +47,139 @@
             </div>
           </div>
           
-          <!-- Role-specific dashboard content -->
-          <% if (user.role === 'admin') { %>
-            <div class="row row-deck row-cards">
-              <div class="col-sm-6 col-lg-3">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="subheader">Total Users</div>
-                    </div>
-                    <div class="d-flex align-items-baseline">
-                      <div class="h1 mb-0 me-2">-</div>
-                    </div>
+          <!-- Dashboard Stats -->
+          <div class="row row-deck row-cards">
+            <!-- Total Users Card -->
+            <div class="col-sm-6 col-lg-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="subheader">Total Users</div>
+                  </div>
+                  <div class="d-flex align-items-baseline">
+                    <div class="h1 mb-0 me-2"><%= stats.userCount || 0 %></div>
+                    <% if (stats.activeUserCount) { %>
+                      <div class="me-auto">
+                        <span class="text-green d-inline-flex align-items-center lh-1">
+                          <i class="ti ti-users me-1"></i>
+                          <%= stats.activeUserCount %> Active
+                        </span>
+                      </div>
+                    <% } %>
                   </div>
                 </div>
-              </div>
-              <div class="col-sm-6 col-lg-3">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="subheader">Total Students</div>
-                    </div>
-                    <div class="d-flex align-items-baseline">
-                      <div class="h1 mb-0 me-2">-</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm-6 col-lg-3">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="subheader">Total Faculty</div>
-                    </div>
-                    <div class="d-flex align-items-baseline">
-                      <div class="h1 mb-0 me-2">-</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm-6 col-lg-3">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="subheader">Departments</div>
-                    </div>
-                    <div class="d-flex align-items-baseline">
-                      <div class="h1 mb-0 me-2">-</div>
-                    </div>
-                  </div>
+                <div class="card-footer">
+                  <a href="/admin/users" class="btn btn-sm">View All Users</a>
                 </div>
               </div>
             </div>
-          <% } else if (user.role === 'faculty' || user.role === 'hod') { %>
-            <div class="row row-deck row-cards">
-              <div class="col-sm-6 col-lg-3">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="subheader">My Courses</div>
-                    </div>
-                    <div class="d-flex align-items-baseline">
-                      <div class="h1 mb-0 me-2">-</div>
-                    </div>
+            
+            <!-- Total Students Card -->
+            <div class="col-sm-6 col-lg-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="subheader">Total Students</div>
+                  </div>
+                  <div class="d-flex align-items-baseline">
+                    <div class="h1 mb-0 me-2"><%= stats.studentCount || 0 %></div>
                   </div>
                 </div>
-              </div>
-              <div class="col-sm-6 col-lg-3">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="subheader">Today's Classes</div>
-                    </div>
-                    <div class="d-flex align-items-baseline">
-                      <div class="h1 mb-0 me-2">-</div>
-                    </div>
-                  </div>
+                <div class="card-footer">
+                  <a href="/students" class="btn btn-sm">View All Students</a>
                 </div>
               </div>
             </div>
-          <% } else if (user.role === 'student') { %>
-            <div class="row row-deck row-cards">
-              <div class="col-sm-6 col-lg-3">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="subheader">My Courses</div>
-                    </div>
-                    <div class="d-flex align-items-baseline">
-                      <div class="h1 mb-0 me-2">-</div>
-                    </div>
+            
+            <!-- Total Faculty Card -->
+            <div class="col-sm-6 col-lg-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="subheader">Total Faculty</div>
+                  </div>
+                  <div class="d-flex align-items-baseline">
+                    <div class="h1 mb-0 me-2"><%= stats.facultyCount || 0 %></div>
                   </div>
                 </div>
-              </div>
-              <div class="col-sm-6 col-lg-3">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="subheader">Today's Classes</div>
-                    </div>
-                    <div class="d-flex align-items-baseline">
-                      <div class="h1 mb-0 me-2">-</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm-6 col-lg-3">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="subheader">Attendance</div>
-                    </div>
-                    <div class="d-flex align-items-baseline">
-                      <div class="h1 mb-0 me-2">-</div>
-                    </div>
-                  </div>
+                <div class="card-footer">
+                  <a href="/faculty" class="btn btn-sm">View All Faculty</a>
                 </div>
               </div>
             </div>
-          <% } %>
+            
+            <!-- Total Departments Card -->
+            <div class="col-sm-6 col-lg-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="subheader">Departments</div>
+                  </div>
+                  <div class="d-flex align-items-baseline">
+                    <div class="h1 mb-0 me-2"><%= stats.departmentCount || 0 %></div>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <a href="/master/department" class="btn btn-sm">View All Departments</a>
+                </div>
+              </div>
+            </div>
+            
+            <% if (user && user.role === 'admin') { %>
+              <!-- Additional Admin Stats -->
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Colleges</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2"><%= stats.collegeCount || 0 %></div>
+                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <a href="/master/college" class="btn btn-sm">View All Colleges</a>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Programs</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2"><%= stats.programCount || 0 %></div>
+                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <a href="/master/program" class="btn btn-sm">View All Programs</a>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="subheader">Batches</div>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                      <div class="h1 mb-0 me-2"><%= stats.batchCount || 0 %></div>
+                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <a href="/master/batch" class="btn btn-sm">View All Batches</a>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+          </div>
           
           <!-- Quick Actions and Notifications -->
           <div class="row row-deck row-cards mt-3">
+            <!-- Quick Actions -->
             <div class="col-md-6 col-lg-4">
               <div class="card">
                 <div class="card-header">
@@ -183,7 +193,7 @@
                     </div>
                   </a>
                   
-                  <% if (user.role === 'admin') { %>
+                  <% if (user && user.role === 'admin') { %>
                     <a href="/admin/users" class="list-group-item list-group-item-action">
                       <div class="row align-items-center">
                         <div class="col-auto"><i class="ti ti-users text-blue"></i></div>
@@ -196,9 +206,27 @@
                         <div class="col">View Students</div>
                       </div>
                     </a>
+                    <a href="/master/college" class="list-group-item list-group-item-action">
+                      <div class="row align-items-center">
+                        <div class="col-auto"><i class="ti ti-building text-blue"></i></div>
+                        <div class="col">Manage Colleges</div>
+                      </div>
+                    </a>
+                    <a href="/admin/settings" class="list-group-item list-group-item-action">
+                      <div class="row align-items-center">
+                        <div class="col-auto"><i class="ti ti-settings text-blue"></i></div>
+                        <div class="col">System Settings</div>
+                      </div>
+                    </a>
                   <% } %>
                   
-                  <% if (user.role === 'faculty' || user.role === 'hod') { %>
+                  <% if (user && (user.role === 'faculty' || user.role === 'hod')) { %>
+                    <a href="/attendance/mark" class="list-group-item list-group-item-action">
+                      <div class="row align-items-center">
+                        <div class="col-auto"><i class="ti ti-checklist text-blue"></i></div>
+                        <div class="col">Mark Attendance</div>
+                      </div>
+                    </a>
                     <a href="/students" class="list-group-item list-group-item-action">
                       <div class="row align-items-center">
                         <div class="col-auto"><i class="ti ti-users text-blue"></i></div>
@@ -206,25 +234,74 @@
                       </div>
                     </a>
                   <% } %>
+                  
+                  <% if (user && user.role === 'student') { %>
+                    <a href="/my-attendance" class="list-group-item list-group-item-action">
+                      <div class="row align-items-center">
+                        <div class="col-auto"><i class="ti ti-calendar-stats text-blue"></i></div>
+                        <div class="col">My Attendance</div>
+                      </div>
+                    </a>
+                    <a href="/my-courses" class="list-group-item list-group-item-action">
+                      <div class="row align-items-center">
+                        <div class="col-auto"><i class="ti ti-books text-blue"></i></div>
+                        <div class="col">My Courses</div>
+                      </div>
+                    </a>
+                  <% } %>
                 </div>
               </div>
             </div>
             
+            <!-- Notifications -->
             <div class="col-md-6 col-lg-8">
               <div class="card">
                 <div class="card-header">
                   <h3 class="card-title">Notifications</h3>
                 </div>
                 <div class="list-group list-group-flush">
-                  <div class="list-group-item">
-                    <div class="row align-items-center">
-                      <div class="col text-truncate">
-                        <div class="d-block text-muted mt-n1">
-                          No new notifications
+                  <% if (notifications && notifications.length > 0) { %>
+                    <% notifications.forEach(notification => { %>
+                      <div class="list-group-item">
+                        <div class="row align-items-center">
+                          <div class="col-auto">
+                            <% let iconClass = "ti-info-circle"; %>
+                            <% let colorClass = "blue"; %>
+                            <% if (notification.notification_type === "Alert") { %>
+                              <% iconClass = "ti-alert-circle"; %>
+                              <% colorClass = "red"; %>
+                            <% } else if (notification.notification_type === "Warning") { %>
+                              <% iconClass = "ti-alert-triangle"; %>
+                              <% colorClass = "yellow"; %>
+                            <% } else if (notification.notification_type === "Success") { %>
+                              <% iconClass = "ti-check-circle"; %>
+                              <% colorClass = "green"; %>
+                            <% } %>
+                            <span class="status-dot <%= notification.is_read ? '' : 'status-dot-animated' %> bg-<%= colorClass %> d-block"></span>
+                          </div>
+                          <div class="col text-truncate">
+                            <a href="#" class="text-body d-block"><%= notification.title %></a>
+                            <div class="d-block text-muted text-truncate mt-n1">
+                              <%= notification.message %>
+                            </div>
+                          </div>
+                          <div class="col-auto">
+                            <div class="badge bg-<%= colorClass %>-lt">
+                              <%= new Date(notification.createdAt).toLocaleString() %>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    <% }) %>
+                  <% } else { %>
+                    <div class="list-group-item">
+                      <div class="row align-items-center">
+                        <div class="col text-truncate">
+                          <span class="text-muted">No new notifications</span>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  <% } %>
                 </div>
               </div>
             </div>

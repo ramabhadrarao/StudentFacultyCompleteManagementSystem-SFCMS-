@@ -1,0 +1,107 @@
+/* public/css/dashboard-stats.css */
+
+/* Enhanced styling for dashboard stat cards */
+.stats-card {
+    transition: all 0.2s ease-in-out;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    height: 100%;
+  }
+  
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .stats-card .card-body {
+    padding: 1.5rem;
+  }
+  
+  .stats-card .subheader {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stats-card .h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #0d6efd;
+    margin-bottom: 0;
+    line-height: 1;
+  }
+  
+  .stats-card .card-footer {
+    background-color: transparent;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 0.75rem 1.5rem;
+  }
+  
+  .stats-card .card-footer .btn {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+  }
+  
+  /* Color variations */
+  .stats-card.stats-users .h1 {
+    color: #3b82f6; /* blue */
+  }
+  
+  .stats-card.stats-students .h1 {
+    color: #10b981; /* green */
+  }
+  
+  .stats-card.stats-faculty .h1 {
+    color: #8b5cf6; /* purple */
+  }
+  
+  .stats-card.stats-departments .h1 {
+    color: #f59e0b; /* yellow */
+  }
+  
+  .stats-card.stats-colleges .h1 {
+    color: #ef4444; /* red */
+  }
+  
+  .stats-card.stats-programs .h1 {
+    color: #14b8a6; /* teal */
+  }
+  
+  .stats-card.stats-batches .h1 {
+    color: #ec4899; /* pink */
+  }
+  
+  /* Icon positioning */
+  .stats-card .stats-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    opacity: 0.2;
+    font-size: 3rem;
+    color: #000;
+  }
+  
+  .stats-card:hover .stats-icon {
+    opacity: 0.3;
+  }
+  
+  /* Animation for the numbers */
+  @keyframes countUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .stats-card .h1 {
+    animation: countUp 0.8s ease-out forwards;
+  }
