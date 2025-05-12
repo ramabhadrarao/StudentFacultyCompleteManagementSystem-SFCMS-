@@ -3,13 +3,19 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const studentController = require('../controllers/studentController');
 const { isAuthenticated, hasRole } = require('../middleware/auth');
 
-// Configure multer for file uploads
+// Configure multer for student photo uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/uploads/students');
+    const uploadDir = 'public/uploads/students';
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     cb(null, `student-${Date.now()}${path.extname(file.originalname)}`);
@@ -31,11 +37,20 @@ const upload = multer({
   }
 });
 
-// Apply authentication middleware to all routes
-router.use(isAuthenticated);
-
 // CSV upload configuration for imports
-const csvStorage = multer.memoryStorage();
+const csvStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = './temp';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir)
+  },
+  filename: (req, file, cb) => {
+    cb(null, `student-import-${Date.now()}.csv`);
+  }
+});
+
 const csvUpload = multer({
   storage: csvStorage,
   fileFilter: (req, file, cb) => {
@@ -44,20 +59,23 @@ const csvUpload = multer({
     } else {
       cb(new Error('Only CSV files are allowed'));
     }
-  }
+  },
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB max
 });
+
+// Apply authentication middleware to all routes
+router.use(isAuthenticated);
 
 // Routes accessible by admin, principal, hod, and faculty
 router.get('/', hasRole(['admin', 'principal', 'hod', 'faculty']), studentController.getStudents);
-router.get('/view/:id', hasRole(['admin', 'principal', 'hod', 'faculty']), studentController.getStudentById);
+router.get('/view/:id', studentController.getStudentById); // Both students and staff can view, controller handles permissions
 
 // Routes accessible only by admin, principal, and hod
 const adminRoles = ['admin', 'principal', 'hod'];
-
 router.get('/create', hasRole(adminRoles), studentController.createStudentForm);
 router.post('/create', hasRole(adminRoles), upload.single('photo'), studentController.createStudent);
-router.get('/edit/:id', hasRole(adminRoles), studentController.editStudentForm);
-router.post('/edit/:id', hasRole(adminRoles), upload.single('photo'), studentController.updateStudent);
+router.get('/edit/:id', studentController.editStudentForm); // Both students and staff can edit, controller handles permissions
+router.post('/edit/:id', upload.single('photo'), studentController.updateStudent); // Both students and staff can update, controller handles permissions
 router.post('/delete/:id', hasRole(adminRoles), studentController.deleteStudent);
 router.post('/reset-password/:id', hasRole(adminRoles), studentController.resetPassword);
 
@@ -68,12 +86,14 @@ router.get('/subcastes/:casteId', studentController.getSubcastesByCaste);
 router.get('/import', hasRole(['admin']), studentController.importStudentsForm);
 router.post('/import', hasRole(['admin']), csvUpload.single('csv'), studentController.importStudents);
 router.get('/import/result', hasRole(['admin']), studentController.importResult);
+router.get('/import/template', hasRole(['admin']), studentController.generateImportTemplate);
 router.get('/export', hasRole(adminRoles), studentController.exportStudents);
 
 // Freeze/Unfreeze Profile Routes
-router.post('/freeze-profile/:id', isAuthenticated, studentController.freezeProfile);
-router.post('/unfreeze-profile/:id', isAuthenticated, hasRole(['admin', 'principal', 'hod']), studentController.unfreezeProfile);
-router.post('/request-unfreeze/:id', isAuthenticated, studentController.requestUnfreeze);
-router.post('/process-unfreeze-request/:id', isAuthenticated, hasRole(['admin', 'principal', 'hod']), studentController.processUnfreezeRequest);
+router.post('/freeze-profile/:id', studentController.freezeProfile); // Both students and staff can freeze, controller handles permissions
+router.post('/unfreeze-profile/:id', hasRole(adminRoles), studentController.unfreezeProfile);
+router.post('/request-unfreeze/:id', studentController.requestUnfreeze);
+router.post('/process-unfreeze-request/:id', hasRole(adminRoles), studentController.processUnfreezeRequest);
+router.get('/dashboard', hasRole(['student']), studentController.dashboard);
 
 module.exports = router;

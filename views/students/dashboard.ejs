@@ -1,0 +1,327 @@
+<!-- views/students/dashboard.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head', { title: 'Student Dashboard' }) %>
+<body>
+  <div class="page">
+    <%- include('../partials/navbar') %>
+    <%- include('../partials/sidebar') %>
+    
+    <div class="page-wrapper">
+      <div class="container-xl">
+        <div class="page-header d-print-none">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="page-title">My Student Dashboard</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="page-body">
+        <div class="container-xl">
+          <%- include('../partials/messages') %>
+          
+          <div class="row row-deck row-cards">
+            <!-- Profile Overview Card -->
+            <div class="col-md-6 col-xl-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <% if (student.photo) { %>
+                    <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(/<%= student.photo %>)"></span>
+                  <% } else { %>
+                    <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-color: #206bc4">
+                      <%= student.name.charAt(0).toUpperCase() %>
+                    </span>
+                  <% } %>
+                  <h3 class="m-0 mb-1"><%= student.name %></h3>
+                  <div class="text-muted">
+                    <%= student.admission_no %>
+                    <% if (student.regd_no) { %>
+                      | <%= student.regd_no %>
+                    <% } %>
+                  </div>
+                  <div class="mt-3">
+                    <% if (student.batch_id) { %>
+                      <span class="badge bg-blue-lt">
+                        <%= student.batch_id.batch_name %> (<%= student.batch_id.start_year %>-<%= student.batch_id.end_year %>)
+                      </span>
+                    <% } %>
+                    <% if (student.is_frozen) { %>
+                      <span class="badge bg-warning-lt">
+                        <i class="ti ti-lock me-1"></i> Profile Frozen
+                      </span>
+                    <% } else { %>
+                      <span class="badge bg-success-lt">
+                        <i class="ti ti-check me-1"></i> Profile Active
+                      </span>
+                    <% } %>
+                  </div>
+
+                  <div class="mt-4">
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <a href="/students/view/<%= student._id %>" class="btn btn-primary w-100">
+                          <i class="ti ti-user me-1"></i>
+                          View Profile
+                        </a>
+                      </div>
+                      <div class="col-6">
+                        <% if (!student.is_frozen) { %>
+                          <a href="/students/edit/<%= student._id %>" class="btn btn-info w-100">
+                            <i class="ti ti-edit me-1"></i>
+                            Edit Profile
+                          </a>
+                        <% } else { %>
+                          <button type="button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#modal-unfreeze-request">
+                            <i class="ti ti-lock-open me-1"></i>
+                            Request Unfreeze
+                          </button>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <% if (!student.is_frozen) { %>
+                  <div class="card-footer">
+                    <button type="button" class="btn btn-outline-warning w-100" data-bs-toggle="modal" data-bs-target="#modal-freeze">
+                      <i class="ti ti-lock me-1"></i>
+                      Freeze My Profile
+                    </button>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+            
+            <!-- Profile Completion Card -->
+            <div class="col-md-6 col-xl-4">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Profile Completion</h3>
+                </div>
+                <div class="card-body">
+                  <% 
+                    // Calculate completion percentage
+                    const fields = ['name', 'email', 'mobile', 'address', 'father_name', 'mother_name', 'aadhar'];
+                    let filledCount = 0;
+                    fields.forEach(field => {
+                      if (student[field] && student[field].trim() !== '') {
+                        filledCount++;
+                      }
+                    });
+                    const completionPercent = Math.round((filledCount / fields.length) * 100);
+                    
+                    // Determine color based on percentage
+                    let progressColor = 'red';
+                    if (completionPercent >= 75) {
+                      progressColor = 'green';
+                    } else if (completionPercent >= 50) {
+                      progressColor = 'yellow';
+                    } else if (completionPercent >= 25) {
+                      progressColor = 'orange';
+                    }
+                  %>
+                  
+                  <div class="d-flex mb-2">
+                    <div>Profile Completion</div>
+                    <div class="ms-auto">
+                      <span class="text-<%= progressColor %>"><%= completionPercent %>%</span>
+                    </div>
+                  </div>
+                  <div class="progress progress-sm">
+                    <div class="progress-bar bg-<%= progressColor %>" style="width: <%= completionPercent %>%" role="progressbar" aria-valuenow="<%= completionPercent %>" aria-valuemin="0" aria-valuemax="100" aria-label="<%= completionPercent %>% Complete">
+                      <span class="visually-hidden"><%= completionPercent %>% Complete</span>
+                    </div>
+                  </div>
+                  
+                  <div class="mt-4">
+                    <div class="row g-2">
+                      <% 
+                        const missingFields = [];
+                        fields.forEach(field => {
+                          if (!student[field] || student[field].trim() === '') {
+                            let fieldName = field.replace('_', ' ');
+                            fieldName = fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+                            missingFields.push(fieldName);
+                          }
+                        });
+                      %>
+                      
+                      <% if (missingFields.length > 0) { %>
+                        <div class="col-12">
+                          <div class="alert alert-warning mb-0" role="alert">
+                            <h4 class="alert-title">Complete your profile</h4>
+                            <div class="text-muted">The following information is missing:</div>
+                            <ul class="mt-2 mb-0">
+                              <% missingFields.forEach(field => { %>
+                                <li><%= field %></li>
+                              <% }); %>
+                            </ul>
+                          </div>
+                        </div>
+                      <% } else { %>
+                        <div class="col-12">
+                          <div class="alert alert-success mb-0" role="alert">
+                            <h4 class="alert-title">Profile Complete!</h4>
+                            <div>All required information has been provided. Thank you for keeping your profile up to date.</div>
+                          </div>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Unfreeze Requests Card -->
+            <% if (student.unfreeze_requests && student.unfreeze_requests.length > 0) { %>
+              <div class="col-md-6 col-xl-4">
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Unfreeze Requests</h3>
+                    <% 
+                      const pendingRequests = student.unfreeze_requests.filter(req => req.status === 'pending');
+                      if (pendingRequests.length > 0) { 
+                    %>
+                      <span class="badge bg-yellow ms-2"><%= pendingRequests.length %> Pending</span>
+                    <% } %>
+                  </div>
+                  <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                      <% if (student.unfreeze_requests.length === 0) { %>
+                        <div class="list-group-item">
+                          <div class="text-muted">No unfreeze requests found</div>
+                        </div>
+                      <% } else { %>
+                        <% 
+                          // Sort by request date, newest first
+                          const sortedRequests = [...student.unfreeze_requests].sort((a, b) => new Date(b.requested_at) - new Date(a.requested_at));
+                          sortedRequests.slice(0, 5).forEach(request => { 
+                        %>
+                          <div class="list-group-item">
+                            <div class="row align-items-center">
+                              <div class="col-auto">
+                                <% if (request.status === 'pending') { %>
+                                  <span class="badge bg-yellow">Pending</span>
+                                <% } else if (request.status === 'approved') { %>
+                                  <span class="badge bg-green">Approved</span>
+                                <% } else { %>
+                                  <span class="badge bg-red">Rejected</span>
+                                <% } %>
+                              </div>
+                              <div class="col">
+                                <div class="d-block text-truncate"><%= request.reason %></div>
+                                <div class="text-muted small">Requested: <%= new Date(request.requested_at).toLocaleDateString() %></div>
+                                <% if (request.processed_at) { %>
+                                  <div class="text-muted small">Processed: <%= new Date(request.processed_at).toLocaleDateString() %></div>
+                                <% } %>
+                              </div>
+                            </div>
+                          </div>
+                        <% }); %>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Freeze Profile Modal -->
+      <div class="modal modal-blur fade" id="modal-freeze" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Freeze Profile</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/students/freeze-profile/<%= student._id %>" method="POST">
+              <div class="modal-body">
+                <div class="alert alert-warning" role="alert">
+                  <h4 class="alert-title">Important Information</h4>
+                  <p>Freezing your profile will prevent any further changes to your personal information until it is unfrozen by an administrator.</p>
+                  <p>You should freeze your profile when:</p>
+                  <ul>
+                    <li>You have verified all your information is correct and complete</li>
+                    <li>You have submitted your final documentation</li>
+                    <li>You have been instructed to do so by your college administration</li>
+                  </ul>
+                </div>
+                <p>Are you sure you want to freeze your profile?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-warning ms-auto">
+                  <i class="ti ti-lock me-1"></i>
+                  Freeze My Profile
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Unfreeze Request Modal -->
+      <% if (student.is_frozen) { %>
+        <div class="modal modal-blur fade" id="modal-unfreeze-request" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Request to Unfreeze Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              
+              <% 
+                const pendingRequest = student.unfreeze_requests.find(req => req.status === 'pending');
+                if (pendingRequest) { 
+              %>
+                <div class="modal-body">
+                  <div class="alert alert-info" role="alert">
+                    <h4 class="alert-title">You already have a pending request</h4>
+                    <p>You submitted an unfreeze request on <%= new Date(pendingRequest.requested_at).toLocaleDateString() %>.</p>
+                    <p>Reason provided: <%= pendingRequest.reason %></p>
+                    <p>Please wait for the administrators to process your request.</p>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    OK, I'll Wait
+                  </button>
+                </div>
+              <% } else { %>
+                <form action="/students/request-unfreeze/<%= student._id %>" method="POST">
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label class="form-label required">Reason for Unfreeze Request</label>
+                      <textarea class="form-control" name="reason" rows="3" placeholder="Please provide a reason for your request to unfreeze your profile" required></textarea>
+                    </div>
+                    <p class="text-muted small">Your request will be reviewed by an administrator. You will be notified once it is processed.</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                      Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary ms-auto">
+                      <i class="ti ti-send me-1"></i>
+                      Submit Request
+                    </button>
+                  </div>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% } %>
+      
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+  
+  <%- include('../partials/scripts') %>
+</body>
+</html>

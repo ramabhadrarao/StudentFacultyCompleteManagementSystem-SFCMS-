@@ -1459,6 +1459,39 @@ exports.processUnfreezeRequest = async (req, res) => {
   }
 };
 
+// Add this to controllers/studentController.js
+
+// Student Dashboard (for self-management)
+exports.dashboard = async (req, res) => {
+  try {
+    // Find student linked to the current user
+    const student = await Student.findOne({ user_id: req.session.user.id })
+      .populate('batch_id')
+      .populate('gender_id')
+      .populate('blood_group_id')
+      .populate('nationality_id')
+      .populate('religion_id')
+      .populate('student_type_id')
+      .populate('caste_id')
+      .populate('sub_caste_id')
+      .populate('user_id');
+    
+    if (!student) {
+      req.flash('error', 'Student profile not found for your account');
+      return res.redirect('/dashboard');
+    }
+    
+    res.render('students/dashboard', {
+      title: 'Student Dashboard',
+      student,
+      isOwnProfile: true
+    });
+  } catch (err) {
+    console.error('Error fetching student dashboard:', err);
+    req.flash('error', 'Failed to load your student dashboard');
+    res.redirect('/dashboard');
+  }
+};
 // Add these helper functions to controllers/studentController.js
 
 /**
