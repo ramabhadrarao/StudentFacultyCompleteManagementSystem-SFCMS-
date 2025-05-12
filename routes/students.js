@@ -70,4 +70,10 @@ router.post('/import', hasRole(['admin']), csvUpload.single('csv'), studentContr
 router.get('/import/result', hasRole(['admin']), studentController.importResult);
 router.get('/export', hasRole(adminRoles), studentController.exportStudents);
 
+// Freeze/Unfreeze Profile Routes
+router.post('/freeze-profile/:id', isAuthenticated, studentController.freezeProfile);
+router.post('/unfreeze-profile/:id', isAuthenticated, hasRole(['admin', 'principal', 'hod']), studentController.unfreezeProfile);
+router.post('/request-unfreeze/:id', isAuthenticated, studentController.requestUnfreeze);
+router.post('/process-unfreeze-request/:id', isAuthenticated, hasRole(['admin', 'principal', 'hod']), studentController.processUnfreezeRequest);
+
 module.exports = router;

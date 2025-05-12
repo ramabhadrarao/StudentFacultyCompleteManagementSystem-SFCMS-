@@ -1,11 +1,11 @@
-<!-- views/students/index.ejs -->
+<!-- views/students/index.ejs - Enhanced version -->
 <!DOCTYPE html>
 <html lang="en">
 <%- include('../partials/head', { title: 'Student Management' }) %>
 <body>
   <div class="page">
-    <%- include('../partials/header') %>
-    <%- include('../partials/navigation') %>
+    <%- include('../partials/navbar') %>
+    <%- include('../partials/sidebar') %>
     
     <div class="page-wrapper">
       <div class="container-xl">
@@ -16,10 +16,20 @@
             </div>
             <div class="col-auto ms-auto">
               <div class="btn-list">
-                <a href="/students/create" class="btn btn-primary d-none d-sm-inline-block">
-                  <i class="ti ti-plus"></i>
-                  Add Student
-                </a>
+                <% if (user && ['admin', 'principal', 'hod'].includes(user.role)) { %>
+                  <a href="/students/import" class="btn btn-outline-primary d-none d-sm-inline-block me-2">
+                    <i class="ti ti-file-import"></i>
+                    Import Students
+                  </a>
+                  <a href="/students/export<%= searchQuery %>" class="btn btn-outline-success d-none d-sm-inline-block me-2">
+                    <i class="ti ti-file-export"></i>
+                    Export
+                  </a>
+                  <a href="/students/create" class="btn btn-primary d-none d-sm-inline-block">
+                    <i class="ti ti-plus"></i>
+                    Add Student
+                  </a>
+                <% } %>
               </div>
             </div>
           </div>
@@ -30,11 +40,225 @@
         <div class="container-xl">
           <%- include('../partials/messages') %>
           
-          <!-- Students will be displayed here -->
+          <!-- Filter panel -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <form action="/students" method="GET" class="row g-3">
+                <div class="col-md-2">
+                  <label class="form-label">Batch</label>
+                  <select class="form-select" name="batch">
+                    <option value="">All Batches</option>
+                    <% batches.forEach(batch => { %>
+                      <option value="<%= batch._id %>" <%= selectedBatch === batch._id.toString() ? 'selected' : '' %>>
+                        <%= batch.batch_name %>
+                      </option>
+                    <% }) %>
+                  </select>
+                </div>
+                
+                <div class="col-md-2">
+                  <label class="form-label">Student Type</label>
+                  <select class="form-select" name="student_type">
+                    <option value="">All Types</option>
+                    <% studentTypes.forEach(type => { %>
+                      <option value="<%= type._id %>" <%= selectedStudentType === type._id.toString() ? 'selected' : '' %>>
+                        <%= type.name %>
+                      </option>
+                    <% }) %>
+                  </select>
+                </div>
+                
+                <div class="col-md-2">
+                  <label class="form-label">Status</label>
+                  <select class="form-select" name="is_frozen">
+                    <option value="">All Status</option>
+                    <option value="true" <%= isFrozen === 'true' ? 'selected' : '' %>>Frozen</option>
+                    <option value="false" <%= isFrozen === 'false' ? 'selected' : '' %>>Active</option>
+                  </select>
+                </div>
+                
+                <div class="col-md-3">
+                  <label class="form-label">Student Name</label>
+                  <input type="text" class="form-control" name="name" value="<%= searchName %>" placeholder="Search by name">
+                </div>
+                
+                <div class="col-md-3">
+                  <label class="form-label">Admission No.</label>
+                  <input type="text" class="form-control" name="admission_no" value="<%= searchAdmission %>" placeholder="Search by admission number">
+                </div>
+                
+                <div class="col-md-12 d-flex gap-2 justify-content-end">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-search me-1"></i>
+                    Search
+                  </button>
+                  <a href="/students" class="btn btn-outline-secondary">
+                    <i class="ti ti-refresh me-1"></i>
+                    Reset
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+          
+          <!-- Students table -->
           <div class="card">
             <div class="card-body">
-              <h3>Student List</h3>
-              <p>This is a placeholder for the student list. Implement the full view later.</p>
+              <div class="table-responsive">
+                <table class="table table-vcenter table-hover card-table">
+                  <thead>
+                    <tr>
+                      <th>Photo</th>
+                      <th>Admission No.</th>
+                      <th>Name</th>
+                      <th>Batch</th>
+                      <th>Contact</th>
+                      <th>Status</th>
+                      <th class="w-1">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (students.length === 0) { %>
+                      <tr>
+                        <td colspan="7" class="text-center">No students found</td>
+                      </tr>
+                    <% } else { %>
+                      <% students.forEach(student => { %>
+                        <tr>
+                          <td>
+                            <% if (student.photo) { %>
+                              <span class="avatar" style="background-image: url(/<%= student.photo %>)"></span>
+                            <% } else { %>
+                              <span class="avatar"><%= student.name.charAt(0).toUpperCase() %></span>
+                            <% } %>
+                          </td>
+                          <td><%= student.admission_no %></td>
+                          <td>
+                            <div class="d-flex flex-column">
+                              <div><%= student.name %></div>
+                              <% if (student.regd_no) { %>
+                                <div class="text-muted small">Reg: <%= student.regd_no %></div>
+                              <% } %>
+                            </div>
+                          </td>
+                          <td>
+                            <% if (student.batch_id) { %>
+                              <%= student.batch_id.batch_name %>
+                            <% } else { %>
+                              Not assigned
+                            <% } %>
+                          </td>
+                          <td>
+                            <div class="d-flex flex-column">
+                              <div><%= student.mobile || '-' %></div>
+                              <div class="text-muted small"><%= student.email || '-' %></div>
+                            </div>
+                          </td>
+                          <td>
+                            <% if (student.is_frozen) { %>
+                              <span class="badge bg-warning">Frozen</span>
+                            <% } else { %>
+                              <span class="badge bg-success">Active</span>
+                            <% } %>
+                          </td>
+                          <td>
+                            <div class="btn-list flex-nowrap">
+                              <a href="/students/view/<%= student._id %>" class="btn btn-sm btn-info">
+                                <i class="ti ti-eye"></i>
+                              </a>
+                              
+                              <% if (user && ['admin', 'principal', 'hod'].includes(user.role)) { %>
+                                <a href="/students/edit/<%= student._id %>" class="btn btn-sm btn-primary">
+                                  <i class="ti ti-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteModal"
+                                        data-id="<%= student._id %>"
+                                        data-name="<%= student.name %>">
+                                  <i class="ti ti-trash"></i>
+                                </button>
+                              <% } %>
+                            </div>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Pagination -->
+              <% if (pagination.pages > 1) { %>
+                <div class="mt-3 d-flex justify-content-center">
+                  <ul class="pagination">
+                    <% if (pagination.page > 1) { %>
+                      <li class="page-item">
+                        <a class="page-link" href="/students?page=<%= pagination.page - 1 %><%= searchQuery %>">
+                          <i class="ti ti-chevron-left"></i>
+                          Prev
+                        </a>
+                      </li>
+                    <% } else { %>
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#">
+                          <i class="ti ti-chevron-left"></i>
+                          Prev
+                        </a>
+                      </li>
+                    <% } %>
+                    
+                    <% for (let i = 1; i <= pagination.pages; i++) { %>
+                      <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                        <a class="page-link" href="/students?page=<%= i %><%= searchQuery %>"><%= i %></a>
+                      </li>
+                    <% } %>
+                    
+                    <% if (pagination.page < pagination.pages) { %>
+                      <li class="page-item">
+                        <a class="page-link" href="/students?page=<%= pagination.page + 1 %><%= searchQuery %>">
+                          Next
+                          <i class="ti ti-chevron-right"></i>
+                        </a>
+                      </li>
+                    <% } else { %>
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#">
+                          Next
+                          <i class="ti ti-chevron-right"></i>
+                        </a>
+                      </li>
+                    <% } %>
+                  </ul>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Delete Modal -->
+      <div class="modal modal-blur fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Delete Student</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure you want to delete the student: <strong id="deleteStudentName"></strong>?</p>
+              <p class="text-danger">This action cannot be undone. This will permanently delete the student and their user account.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                Cancel
+              </button>
+              <form id="deleteForm" action="" method="POST">
+                <button type="submit" class="btn btn-danger ms-auto">
+                  <i class="ti ti-trash me-1"></i>
+                  Delete Student
+                </button>
+              </form>
             </div>
           </div>
         </div>
@@ -45,5 +269,22 @@
   </div>
   
   <%- include('../partials/scripts') %>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set up delete modal
+      const deleteModal = document.getElementById('deleteModal');
+      if (deleteModal) {
+        deleteModal.addEventListener('show.bs.modal', function(event) {
+          const button = event.relatedTarget;
+          const id = button.getAttribute('data-id');
+          const name = button.getAttribute('data-name');
+          
+          document.getElementById('deleteStudentName').textContent = name;
+          document.getElementById('deleteForm').action = `/students/delete/${id}`;
+        });
+      }
+    });
+  </script>
 </body>
 </html>

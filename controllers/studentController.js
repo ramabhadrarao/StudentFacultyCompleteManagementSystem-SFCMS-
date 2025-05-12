@@ -551,186 +551,186 @@ exports.deleteStudent = async (req, res) => {
 };
 
 // Freeze student profile (self or admin)
-exports.freezeProfile = async (req, res) => {
-  try {
-    const student = await Student.findById(req.params.id);
+// exports.freezeProfile = async (req, res) => {
+//   try {
+//     const student = await Student.findById(req.params.id);
     
-    if (!student) {
-      req.flash('error', 'Student not found');
-      return res.redirect('/students');
-    }
+//     if (!student) {
+//       req.flash('error', 'Student not found');
+//       return res.redirect('/students');
+//     }
     
-    // Check if user has permission to freeze
-    const isOwnProfile = req.session.user && student.user_id && 
-                         student.user_id.toString() === req.session.user.id;
+//     // Check if user has permission to freeze
+//     const isOwnProfile = req.session.user && student.user_id && 
+//                          student.user_id.toString() === req.session.user.id;
     
-    if (!isOwnProfile && !['admin', 'principal', 'hod'].includes(req.session.user.role)) {
-      req.flash('error', 'You do not have permission to freeze this profile');
-      return res.redirect('/dashboard');
-    }
+//     if (!isOwnProfile && !['admin', 'principal', 'hod'].includes(req.session.user.role)) {
+//       req.flash('error', 'You do not have permission to freeze this profile');
+//       return res.redirect('/dashboard');
+//     }
     
-    // Update freeze status
-    student.is_frozen = true;
-    student.frozen_at = new Date();
-    student.frozen_by = req.session.user.id;
+//     // Update freeze status
+//     student.is_frozen = true;
+//     student.frozen_at = new Date();
+//     student.frozen_by = req.session.user.id;
     
-    await student.save();
+//     await student.save();
     
-    req.flash('success', 'Student profile has been frozen');
-    res.redirect('/students/view/' + student._id);
-  } catch (err) {
-    console.error('Error freezing student profile:', err);
-    req.flash('error', 'Failed to freeze student profile');
-    res.redirect('/students/view/' + req.params.id);
-  }
-};
+//     req.flash('success', 'Student profile has been frozen');
+//     res.redirect('/students/view/' + student._id);
+//   } catch (err) {
+//     console.error('Error freezing student profile:', err);
+//     req.flash('error', 'Failed to freeze student profile');
+//     res.redirect('/students/view/' + req.params.id);
+//   }
+// };
 
 // Unfreeze student profile (admin only)
-exports.unfreezeProfile = async (req, res) => {
-  try {
-    const student = await Student.findById(req.params.id);
+// exports.unfreezeProfile = async (req, res) => {
+//   try {
+//     const student = await Student.findById(req.params.id);
     
-    if (!student) {
-      req.flash('error', 'Student not found');
-      return res.redirect('/students');
-    }
+//     if (!student) {
+//       req.flash('error', 'Student not found');
+//       return res.redirect('/students');
+//     }
     
-    // Only admin/principal/hod can unfreeze profiles
-    if (!['admin', 'principal', 'hod'].includes(req.session.user.role)) {
-      req.flash('error', 'You do not have permission to unfreeze profiles');
-      return res.redirect('/dashboard');
-    }
+//     // Only admin/principal/hod can unfreeze profiles
+//     if (!['admin', 'principal', 'hod'].includes(req.session.user.role)) {
+//       req.flash('error', 'You do not have permission to unfreeze profiles');
+//       return res.redirect('/dashboard');
+//     }
     
-    // Update freeze status
-    student.is_frozen = false;
-    student.frozen_at = null;
-    student.frozen_by = null;
+//     // Update freeze status
+//     student.is_frozen = false;
+//     student.frozen_at = null;
+//     student.frozen_by = null;
     
-    // Clear pending unfreeze requests
-    student.unfreeze_requests = student.unfreeze_requests.map(request => {
-      if (request.status === 'pending') {
-        return {
-          ...request,
-          status: 'approved',
-          processed_at: new Date(),
-          processed_by: req.session.user.id
-        };
-      }
-      return request;
-    });
+//     // Clear pending unfreeze requests
+//     student.unfreeze_requests = student.unfreeze_requests.map(request => {
+//       if (request.status === 'pending') {
+//         return {
+//           ...request,
+//           status: 'approved',
+//           processed_at: new Date(),
+//           processed_by: req.session.user.id
+//         };
+//       }
+//       return request;
+//     });
     
-    await student.save();
+//     await student.save();
     
-    req.flash('success', 'Student profile has been unfrozen');
-    res.redirect('/students/view/' + student._id);
-  } catch (err) {
-    console.error('Error unfreezing student profile:', err);
-    req.flash('error', 'Failed to unfreeze student profile');
-    res.redirect('/students/view/' + req.params.id);
-  }
-};
+//     req.flash('success', 'Student profile has been unfrozen');
+//     res.redirect('/students/view/' + student._id);
+//   } catch (err) {
+//     console.error('Error unfreezing student profile:', err);
+//     req.flash('error', 'Failed to unfreeze student profile');
+//     res.redirect('/students/view/' + req.params.id);
+//   }
+// };
 
 // Submit unfreeze request (student)
-exports.requestUnfreeze = async (req, res) => {
-  try {
-    const { reason } = req.body;
-    const student = await Student.findById(req.params.id);
+// exports.requestUnfreeze = async (req, res) => {
+//   try {
+//     const { reason } = req.body;
+//     const student = await Student.findById(req.params.id);
     
-    if (!student) {
-      req.flash('error', 'Student not found');
-      return res.redirect('/students');
-    }
+//     if (!student) {
+//       req.flash('error', 'Student not found');
+//       return res.redirect('/students');
+//     }
     
-    // Check if user is the student
-    const isOwnProfile = req.session.user && student.user_id && 
-                         student.user_id.toString() === req.session.user.id;
+//     // Check if user is the student
+//     const isOwnProfile = req.session.user && student.user_id && 
+//                          student.user_id.toString() === req.session.user.id;
     
-    if (!isOwnProfile) {
-      req.flash('error', 'You can only request to unfreeze your own profile');
-      return res.redirect('/dashboard');
-    }
+//     if (!isOwnProfile) {
+//       req.flash('error', 'You can only request to unfreeze your own profile');
+//       return res.redirect('/dashboard');
+//     }
     
-    // Check if profile is frozen
-    if (!student.is_frozen) {
-      req.flash('error', 'Your profile is not frozen');
-      return res.redirect('/students/view/' + student._id);
-    }
+//     // Check if profile is frozen
+//     if (!student.is_frozen) {
+//       req.flash('error', 'Your profile is not frozen');
+//       return res.redirect('/students/view/' + student._id);
+//     }
     
-    // Check for existing pending request
-    const hasPendingRequest = student.unfreeze_requests.some(request => request.status === 'pending');
+//     // Check for existing pending request
+//     const hasPendingRequest = student.unfreeze_requests.some(request => request.status === 'pending');
     
-    if (hasPendingRequest) {
-      req.flash('error', 'You already have a pending unfreeze request');
-      return res.redirect('/students/view/' + student._id);
-    }
+//     if (hasPendingRequest) {
+//       req.flash('error', 'You already have a pending unfreeze request');
+//       return res.redirect('/students/view/' + student._id);
+//     }
     
-    // Add unfreeze request
-    student.unfreeze_requests.push({
-      requested_at: new Date(),
-      reason,
-      status: 'pending'
-    });
+//     // Add unfreeze request
+//     student.unfreeze_requests.push({
+//       requested_at: new Date(),
+//       reason,
+//       status: 'pending'
+//     });
     
-    await student.save();
+//     await student.save();
     
-    req.flash('success', 'Unfreeze request submitted successfully');
-    res.redirect('/students/view/' + student._id);
-  } catch (err) {
-    console.error('Error submitting unfreeze request:', err);
-    req.flash('error', 'Failed to submit unfreeze request');
-    res.redirect('/students/view/' + req.params.id);
-  }
-};
+//     req.flash('success', 'Unfreeze request submitted successfully');
+//     res.redirect('/students/view/' + student._id);
+//   } catch (err) {
+//     console.error('Error submitting unfreeze request:', err);
+//     req.flash('error', 'Failed to submit unfreeze request');
+//     res.redirect('/students/view/' + req.params.id);
+//   }
+// };
 
 // Process unfreeze request (admin)
-exports.processUnfreezeRequest = async (req, res) => {
-  try {
-    const { requestId, action } = req.body;
-    const student = await Student.findById(req.params.id);
+// exports.processUnfreezeRequest = async (req, res) => {
+//   try {
+//     const { requestId, action } = req.body;
+//     const student = await Student.findById(req.params.id);
     
-    if (!student) {
-      req.flash('error', 'Student not found');
-      return res.redirect('/students');
-    }
+//     if (!student) {
+//       req.flash('error', 'Student not found');
+//       return res.redirect('/students');
+//     }
     
-    // Only admin/principal/hod can process unfreeze requests
-    if (!['admin', 'principal', 'hod'].includes(req.session.user.role)) {
-      req.flash('error', 'You do not have permission to process unfreeze requests');
-      return res.redirect('/dashboard');
-    }
+//     // Only admin/principal/hod can process unfreeze requests
+//     if (!['admin', 'principal', 'hod'].includes(req.session.user.role)) {
+//       req.flash('error', 'You do not have permission to process unfreeze requests');
+//       return res.redirect('/dashboard');
+//     }
     
-    // Find the request
-    const requestIndex = student.unfreeze_requests.findIndex(
-      request => request._id.toString() === requestId
-    );
+//     // Find the request
+//     const requestIndex = student.unfreeze_requests.findIndex(
+//       request => request._id.toString() === requestId
+//     );
     
-    if (requestIndex === -1) {
-      req.flash('error', 'Unfreeze request not found');
-      return res.redirect('/students/view/' + student._id);
-    }
+//     if (requestIndex === -1) {
+//       req.flash('error', 'Unfreeze request not found');
+//       return res.redirect('/students/view/' + student._id);
+//     }
     
-    // Update request status
-    student.unfreeze_requests[requestIndex].status = action === 'approve' ? 'approved' : 'rejected';
-    student.unfreeze_requests[requestIndex].processed_at = new Date();
-    student.unfreeze_requests[requestIndex].processed_by = req.session.user.id;
+//     // Update request status
+//     student.unfreeze_requests[requestIndex].status = action === 'approve' ? 'approved' : 'rejected';
+//     student.unfreeze_requests[requestIndex].processed_at = new Date();
+//     student.unfreeze_requests[requestIndex].processed_by = req.session.user.id;
     
-    // If approved, unfreeze the profile
-    if (action === 'approve') {
-      student.is_frozen = false;
-      student.frozen_at = null;
-      student.frozen_by = null;
-    }
+//     // If approved, unfreeze the profile
+//     if (action === 'approve') {
+//       student.is_frozen = false;
+//       student.frozen_at = null;
+//       student.frozen_by = null;
+//     }
     
-    await student.save();
+//     await student.save();
     
-    req.flash('success', `Unfreeze request ${action === 'approve' ? 'approved' : 'rejected'} successfully`);
-    res.redirect('/students/view/' + student._id);
-  } catch (err) {
-    console.error('Error processing unfreeze request:', err);
-    req.flash('error', 'Failed to process unfreeze request');
-    res.redirect('/students/view/' + req.params.id);
-  }
-};
+//     req.flash('success', `Unfreeze request ${action === 'approve' ? 'approved' : 'rejected'} successfully`);
+//     res.redirect('/students/view/' + student._id);
+//   } catch (err) {
+//     console.error('Error processing unfreeze request:', err);
+//     req.flash('error', 'Failed to process unfreeze request');
+//     res.redirect('/students/view/' + req.params.id);
+//   }
+// };
 
 // Import students form
 exports.importStudentsForm = async (req, res) => {
@@ -1274,3 +1274,482 @@ exports.resetPassword = async (req, res) => {
     res.redirect(`/students/view/${req.params.id}`);
   }
 };
+
+// Add these functions to controllers/studentController.js
+
+// Freeze student profile (self or admin)
+exports.freezeProfile = async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id);
+    
+    if (!student) {
+      req.flash('error', 'Student not found');
+      return res.redirect('/students');
+    }
+    
+    // Check if user has permission to freeze
+    const isOwnProfile = req.session.user && student.user_id && 
+                       student.user_id.toString() === req.session.user.id;
+    
+    if (!isOwnProfile && !['admin', 'principal', 'hod'].includes(req.session.user.role)) {
+      req.flash('error', 'You do not have permission to freeze this profile');
+      return res.redirect('/dashboard');
+    }
+    
+    // Update freeze status
+    student.is_frozen = true;
+    student.frozen_at = new Date();
+    student.frozen_by = req.session.user.id;
+    
+    await student.save();
+    
+    req.flash('success', 'Student profile has been frozen');
+    res.redirect('/students/view/' + student._id);
+  } catch (err) {
+    console.error('Error freezing student profile:', err);
+    req.flash('error', 'Failed to freeze student profile');
+    res.redirect('/students/view/' + req.params.id);
+  }
+};
+
+// Unfreeze student profile (admin only)
+exports.unfreezeProfile = async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id);
+    
+    if (!student) {
+      req.flash('error', 'Student not found');
+      return res.redirect('/students');
+    }
+    
+    // Only admin/principal/hod can unfreeze profiles
+    if (!['admin', 'principal', 'hod'].includes(req.session.user.role)) {
+      req.flash('error', 'You do not have permission to unfreeze profiles');
+      return res.redirect('/dashboard');
+    }
+    
+    // Update freeze status
+    student.is_frozen = false;
+    student.frozen_at = null;
+    student.frozen_by = null;
+    
+    // Clear pending unfreeze requests
+    student.unfreeze_requests = student.unfreeze_requests.map(request => {
+      if (request.status === 'pending') {
+        return {
+          ...request,
+          status: 'approved',
+          processed_at: new Date(),
+          processed_by: req.session.user.id
+        };
+      }
+      return request;
+    });
+    
+    await student.save();
+    
+    req.flash('success', 'Student profile has been unfrozen');
+    res.redirect('/students/view/' + student._id);
+  } catch (err) {
+    console.error('Error unfreezing student profile:', err);
+    req.flash('error', 'Failed to unfreeze student profile');
+    res.redirect('/students/view/' + req.params.id);
+  }
+};
+
+// Submit unfreeze request (student)
+exports.requestUnfreeze = async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const student = await Student.findById(req.params.id);
+    
+    if (!student) {
+      req.flash('error', 'Student not found');
+      return res.redirect('/students');
+    }
+    
+    // Check if user is the student
+    const isOwnProfile = req.session.user && student.user_id && 
+                       student.user_id.toString() === req.session.user.id;
+    
+    if (!isOwnProfile) {
+      req.flash('error', 'You can only request to unfreeze your own profile');
+      return res.redirect('/dashboard');
+    }
+    
+    // Check if profile is frozen
+    if (!student.is_frozen) {
+      req.flash('error', 'Your profile is not frozen');
+      return res.redirect('/students/view/' + student._id);
+    }
+    
+    // Check for existing pending request
+    const hasPendingRequest = student.unfreeze_requests.some(request => request.status === 'pending');
+    
+    if (hasPendingRequest) {
+      req.flash('error', 'You already have a pending unfreeze request');
+      return res.redirect('/students/view/' + student._id);
+    }
+    
+    // Add unfreeze request
+    student.unfreeze_requests.push({
+      requested_at: new Date(),
+      reason,
+      status: 'pending'
+    });
+    
+    await student.save();
+    
+    req.flash('success', 'Unfreeze request submitted successfully');
+    res.redirect('/students/view/' + student._id);
+  } catch (err) {
+    console.error('Error submitting unfreeze request:', err);
+    req.flash('error', 'Failed to submit unfreeze request');
+    res.redirect('/students/view/' + req.params.id);
+  }
+};
+
+// Process unfreeze request (admin)
+exports.processUnfreezeRequest = async (req, res) => {
+  try {
+    const { requestId, action } = req.body;
+    const student = await Student.findById(req.params.id);
+    
+    if (!student) {
+      req.flash('error', 'Student not found');
+      return res.redirect('/students');
+    }
+    
+    // Only admin/principal/hod can process unfreeze requests
+    if (!['admin', 'principal', 'hod'].includes(req.session.user.role)) {
+      req.flash('error', 'You do not have permission to process unfreeze requests');
+      return res.redirect('/dashboard');
+    }
+    
+    // Find the request
+    const requestIndex = student.unfreeze_requests.findIndex(
+      request => request._id.toString() === requestId
+    );
+    
+    if (requestIndex === -1) {
+      req.flash('error', 'Unfreeze request not found');
+      return res.redirect('/students/view/' + student._id);
+    }
+    
+    // Update request status
+    student.unfreeze_requests[requestIndex].status = action === 'approve' ? 'approved' : 'rejected';
+    student.unfreeze_requests[requestIndex].processed_at = new Date();
+    student.unfreeze_requests[requestIndex].processed_by = req.session.user.id;
+    
+    // If approved, unfreeze the profile
+    if (action === 'approve') {
+      student.is_frozen = false;
+      student.frozen_at = null;
+      student.frozen_by = null;
+    }
+    
+    await student.save();
+    
+    req.flash('success', `Unfreeze request ${action === 'approve' ? 'approved' : 'rejected'} successfully`);
+    res.redirect('/students/view/' + student._id);
+  } catch (err) {
+    console.error('Error processing unfreeze request:', err);
+    req.flash('error', 'Failed to process unfreeze request');
+    res.redirect('/students/view/' + req.params.id);
+  }
+};
+
+// Add these helper functions to controllers/studentController.js
+
+/**
+ * Create or update a user account for a student
+ * @param {String} email - Student email
+ * @param {String} name - Student name
+ * @param {String} admission_no - Student admission number (used as default password)
+ * @param {ObjectId} existingUserId - Existing user ID if any
+ * @returns {Promise<Object>} - Created or updated user object
+ */
+async function createOrUpdateUserAccount(email, name, admission_no, existingUserId = null) {
+  try {
+    if (!email) {
+      return null;
+    }
+    
+    // Generate a username from email or name
+    const username = email.split('@')[0] || name.toLowerCase().replace(/\s+/g, '.');
+    
+    if (existingUserId) {
+      // Update existing user
+      const user = await User.findById(existingUserId);
+      if (!user) {
+        throw new Error('Existing user not found');
+      }
+      
+      user.username = username;
+      user.email = email;
+      // Don't update password unless requested specifically
+      await user.save();
+      
+      return user;
+    } else {
+      // Check if email already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        throw new Error('Email already in use by another user');
+      }
+      
+      // Create new user with default password (admission number)
+      const user = new User({
+        username,
+        email,
+        password_hash: await bcrypt.hash(admission_no, 10),
+        role: 'student',
+        is_active: true
+      });
+      
+      await user.save();
+      return user;
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+/**
+ * Handle the creation of a student with potential user account
+ * @param {Object} studentData - Student data from request body
+ * @param {File} photoFile - Photo file if uploaded
+ * @returns {Promise<Object>} - Created student object
+ */
+async function createStudentWithUser(studentData, photoFile = null) {
+  try {
+    const { 
+      admission_no, 
+      regd_no, 
+      name, 
+      gender_id, 
+      blood_group_id,
+      email, 
+      mobile, 
+      father_name, 
+      mother_name, 
+      father_mobile,
+      mother_mobile,
+      aadhar, 
+      father_aadhar,
+      mother_aadhar,
+      address,
+      batch_id, 
+      nationality_id, 
+      religion_id, 
+      student_type_id, 
+      caste_id, 
+      sub_caste_id 
+    } = studentData;
+    
+    // Check if student with same admission number exists
+    const studentExists = await Student.findOne({ admission_no });
+    if (studentExists) {
+      throw new Error('Student with this admission number already exists');
+    }
+    
+    // Check if student with same aadhar exists (if provided)
+    if (aadhar) {
+      const aadharExists = await Student.findOne({ aadhar });
+      if (aadharExists) {
+        throw new Error('Student with this Aadhar number already exists');
+      }
+    }
+    
+    // Create user account if email is provided
+    let userId = null;
+    if (email) {
+      try {
+        const user = await createOrUpdateUserAccount(email, name, admission_no);
+        userId = user._id;
+      } catch (error) {
+        throw error;
+      }
+    }
+    
+    // Create student
+    const student = new Student({
+      admission_no,
+      regd_no,
+      name,
+      gender_id,
+      blood_group_id,
+      email,
+      mobile,
+      father_name,
+      mother_name,
+      father_mobile,
+      mother_mobile,
+      aadhar,
+      father_aadhar,
+      mother_aadhar,
+      address,
+      batch_id,
+      user_id: userId,
+      nationality_id,
+      religion_id,
+      student_type_id,
+      caste_id,
+      sub_caste_id,
+      is_frozen: false
+    });
+    
+    // Process photo if provided
+    if (photoFile) {
+      student.photo = photoFile.path.replace('public/', '');
+    }
+    
+    await student.save();
+    return student;
+  } catch (error) {
+    throw error;
+  }
+}
+
+/**
+ * Handle updating a student with potential user account changes
+ * @param {String} studentId - Student ID
+ * @param {Object} studentData - Updated student data
+ * @param {File} photoFile - New photo file if uploaded
+ * @param {Boolean} isOwnProfile - Whether the update is being done by the student themselves
+ * @returns {Promise<Object>} - Updated student object
+ */
+async function updateStudentWithUser(studentId, studentData, photoFile = null, isOwnProfile = false) {
+  try {
+    // Find student
+    const student = await Student.findById(studentId);
+    
+    if (!student) {
+      throw new Error('Student not found');
+    }
+    
+    // Check if profile is frozen and it's the student trying to update
+    if (student.is_frozen && isOwnProfile) {
+      throw new Error('Your profile is currently frozen. Please submit an unfreeze request to make changes.');
+    }
+    
+    const { 
+      admission_no, 
+      regd_no, 
+      name, 
+      gender_id, 
+      blood_group_id,
+      email, 
+      mobile, 
+      father_name, 
+      mother_name, 
+      father_mobile,
+      mother_mobile,
+      aadhar, 
+      father_aadhar,
+      mother_aadhar,
+      address,
+      batch_id, 
+      nationality_id, 
+      religion_id, 
+      student_type_id, 
+      caste_id, 
+      sub_caste_id 
+    } = studentData;
+    
+    // Check if admission number is already used by another student
+    if (admission_no !== student.admission_no) {
+      const admissionExists = await Student.findOne({ 
+        admission_no, 
+        _id: { $ne: student._id } 
+      });
+      
+      if (admissionExists) {
+        throw new Error('Admission number already in use');
+      }
+    }
+    
+    // Check if aadhar is already used by another student (if provided)
+    if (aadhar && aadhar !== student.aadhar) {
+      const aadharExists = await Student.findOne({ 
+        aadhar, 
+        _id: { $ne: student._id } 
+      });
+      
+      if (aadharExists) {
+        throw new Error('Aadhar number already in use');
+      }
+    }
+    
+    // Handle email and user account
+    if (email !== student.email) {
+      try {
+        await createOrUpdateUserAccount(email, name, admission_no, student.user_id);
+      } catch (error) {
+        throw error;
+      }
+    }
+    
+    // Only allow certain fields to be updated by students themselves
+    if (isOwnProfile) {
+      // Students can only update some fields of their own profile
+      student.mobile = mobile;
+      student.email = email;
+      student.address = address;
+      
+      // Handle photo upload if provided
+      if (photoFile) {
+        // Remove old photo if exists
+        if (student.photo) {
+          const oldPhotoPath = path.join(__dirname, '..', 'public', student.photo);
+          if (fs.existsSync(oldPhotoPath)) {
+            fs.unlinkSync(oldPhotoPath);
+          }
+        }
+        
+        student.photo = photoFile.path.replace('public/', '');
+      }
+    } else {
+      // Admin/staff can update all fields
+      student.admission_no = admission_no;
+      student.regd_no = regd_no;
+      student.name = name;
+      student.gender_id = gender_id;
+      student.blood_group_id = blood_group_id;
+      student.email = email;
+      student.mobile = mobile;
+      student.father_name = father_name;
+      student.mother_name = mother_name;
+      student.father_mobile = father_mobile;
+      student.mother_mobile = mother_mobile;
+      student.aadhar = aadhar;
+      student.father_aadhar = father_aadhar;
+      student.mother_aadhar = mother_aadhar;
+      student.address = address;
+      student.batch_id = batch_id;
+      student.nationality_id = nationality_id;
+      student.religion_id = religion_id;
+      student.student_type_id = student_type_id;
+      student.caste_id = caste_id;
+      student.sub_caste_id = sub_caste_id;
+      
+      // Handle photo upload if provided
+      if (photoFile) {
+        // Remove old photo if exists
+        if (student.photo) {
+          const oldPhotoPath = path.join(__dirname, '..', 'public', student.photo);
+          if (fs.existsSync(oldPhotoPath)) {
+            fs.unlinkSync(oldPhotoPath);
+          }
+        }
+        
+        student.photo = photoFile.path.replace('public/', '');
+      }
+    }
+    
+    await student.save();
+    return student;
+  } catch (error) {
+    throw error;
+  }
+}

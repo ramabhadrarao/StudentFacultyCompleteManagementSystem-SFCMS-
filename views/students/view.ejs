@@ -1,4 +1,4 @@
-<!-- views/students/view.ejs -->
+<!-- views/students/view.ejs - Enhanced version -->
 <!DOCTYPE html>
 <html lang="en">
 <%- include('../partials/head', { title: 'Student Details' }) %>
@@ -16,12 +16,35 @@
             </div>
             <div class="col-auto ms-auto">
               <div class="btn-list">
-                <% if (user.role === 'admin' || user.role === 'principal' || user.role === 'hod') { %>
-                  <a href="/students/edit/<%= student._id %>" class="btn btn-primary">
-                    <i class="ti ti-edit"></i>
-                    Edit Student
-                  </a>
+                <% if (user.role === 'admin' || user.role === 'principal' || user.role === 'hod' || isOwnProfile) { %>
+                  <% if (!student.is_frozen || (user.role === 'admin' || user.role === 'principal' || user.role === 'hod')) { %>
+                    <a href="/students/edit/<%= student._id %>" class="btn btn-primary">
+                      <i class="ti ti-edit"></i>
+                      Edit Student
+                    </a>
+                  <% } %>
                 <% } %>
+                
+                <!-- Profile Freeze/Unfreeze Button -->
+                <% if (isOwnProfile && !student.is_frozen) { %>
+                  <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal-freeze">
+                    <i class="ti ti-lock me-1"></i>
+                    Freeze Profile
+                  </button>
+                <% } else if (user.role === 'admin' || user.role === 'principal' || user.role === 'hod') { %>
+                  <% if (student.is_frozen) { %>
+                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modal-unfreeze">
+                      <i class="ti ti-lock-open me-1"></i>
+                      Unfreeze Profile
+                    </button>
+                  <% } else { %>
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal-freeze">
+                      <i class="ti ti-lock me-1"></i>
+                      Freeze Profile
+                    </button>
+                  <% } %>
+                <% } %>
+                
                 <a href="/students" class="btn btn-secondary">
                   <i class="ti ti-arrow-left"></i>
                   Back to Students
@@ -36,12 +59,81 @@
         <div class="container-xl">
           <%- include('../partials/messages') %>
           
+          <% if (student.is_frozen) { %>
+            <div class="alert alert-warning">
+              <div class="d-flex">
+                <div class="me-3">
+                  <i class="ti ti-lock alert-icon"></i>
+                </div>
+                <div>
+                  <h4 class="alert-title">Profile is currently frozen</h4>
+                  <div class="text-muted">
+                    <% if (student.frozen_at) { %>
+                      Profile was frozen on <%= new Date(student.frozen_at).toLocaleDateString() %>
+                    <% } %>
+                    <% if (isOwnProfile && student.is_frozen) { %>
+                      <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#modal-unfreeze-request">
+                          Request to Unfreeze
+                        </button>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <% if (user.role === 'admin' || user.role === 'principal' || user.role === 'hod') { %>
+              <% const pendingRequests = student.unfreeze_requests.filter(request => request.status === 'pending'); %>
+              <% if (pendingRequests && pendingRequests.length > 0) { %>
+                <div class="alert alert-info">
+                  <div class="d-flex">
+                    <div class="me-3">
+                      <i class="ti ti-mail alert-icon"></i>
+                    </div>
+                    <div class="flex-fill">
+                      <h4 class="alert-title"><%= pendingRequests.length %> Pending Unfreeze Request<%= pendingRequests.length > 1 ? 's' : '' %></h4>
+                      
+                      <% pendingRequests.forEach(request => { %>
+                        <div class="card card-sm mt-2">
+                          <div class="card-body">
+                            <div class="row align-items-center">
+                              <div class="col">
+                                <div class="text-body d-block">Request from <%= new Date(request.requested_at).toLocaleDateString() %></div>
+                                <div class="d-block text-muted mt-n1">
+                                  Reason: <%= request.reason %>
+                                </div>
+                              </div>
+                              <div class="col-auto">
+                                <form action="/students/process-unfreeze-request/<%= student._id %>" method="POST" class="btn-list">
+                                  <input type="hidden" name="requestId" value="<%= request._id %>">
+                                  <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">
+                                    <i class="ti ti-check me-1"></i>
+                                    Approve
+                                  </button>
+                                  <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">
+                                    <i class="ti ti-x me-1"></i>
+                                    Reject
+                                  </button>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      <% }); %>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+            <% } %>
+          <% } %>
+          
           <div class="row row-cards">
             <div class="col-12 col-lg-4">
               <div class="card">
                 <div class="card-body p-4 text-center">
                   <% if (student.photo) { %>
-                    <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(<%= student.photo %>)"></span>
+                    <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-image: url(/<%= student.photo %>)"></span>
                   <% } else { %>
                     <span class="avatar avatar-xl mb-3 avatar-rounded" style="background-color: #206bc4">
                       <%= student.name.charAt(0).toUpperCase() %>
@@ -63,6 +155,15 @@
                     <% if (student.gender_id) { %>
                       <span class="badge bg-purple-lt">
                         <%= student.gender_id.name %>
+                      </span>
+                    <% } %>
+                    <% if (student.is_frozen) { %>
+                      <span class="badge bg-warning-lt">
+                        <i class="ti ti-lock me-1"></i> Frozen
+                      </span>
+                    <% } else { %>
+                      <span class="badge bg-success-lt">
+                        <i class="ti ti-check me-1"></i> Active
                       </span>
                     <% } %>
                   </div>
@@ -136,6 +237,42 @@
                       </div>
                     </div>
                   <% } %>
+                  
+                  <% if (student.father_mobile) { %>
+                    <div class="mb-2">
+                      <div class="d-flex align-items-center">
+                        <i class="ti ti-phone me-2 text-muted"></i>
+                        <div>
+                          <div class="font-weight-medium"><%= student.father_mobile %></div>
+                          <div class="text-muted">Father's Mobile</div>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                  
+                  <% if (student.mother_mobile) { %>
+                    <div class="mb-2">
+                      <div class="d-flex align-items-center">
+                        <i class="ti ti-phone me-2 text-muted"></i>
+                        <div>
+                          <div class="font-weight-medium"><%= student.mother_mobile %></div>
+                          <div class="text-muted">Mother's Mobile</div>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                  
+                  <% if (student.address) { %>
+                    <div class="mb-2">
+                      <div class="d-flex align-items-center">
+                        <i class="ti ti-map-pin me-2 text-muted"></i>
+                        <div>
+                          <div class="font-weight-medium"><%= student.address %></div>
+                          <div class="text-muted">Address</div>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
                 </div>
               </div>
             </div>
@@ -153,6 +290,14 @@
                     <li class="nav-item">
                       <a href="#account" class="nav-link" data-bs-toggle="tab">Account Details</a>
                     </li>
+                    <% if (student.unfreeze_requests && student.unfreeze_requests.length > 0) { %>
+                      <li class="nav-item">
+                        <a href="#requests" class="nav-link" data-bs-toggle="tab">
+                          Unfreeze Requests
+                          <span class="badge bg-primary ms-1"><%= student.unfreeze_requests.length %></span>
+                        </a>
+                      </li>
+                    <% } %>
                   </ul>
                 </div>
                 <div class="card-body">
@@ -199,6 +344,23 @@
                             <%= student.sub_caste_id ? student.sub_caste_id.name : 'Not specified' %>
                           </div>
                         </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Blood Group</label>
+                          <div class="form-control-plaintext">
+                            <%= student.blood_group_id ? student.blood_group_id.name : 'Not specified' %>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Father's Aadhar</label>
+                          <div class="form-control-plaintext"><%= student.father_aadhar || 'Not provided' %></div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Mother's Aadhar</label>
+                          <div class="form-control-plaintext"><%= student.mother_aadhar || 'Not provided' %></div>
+                        </div>
                       </div>
                     </div>
                     
@@ -229,9 +391,6 @@
                           </div>
                         </div>
                       </div>
-                      
-                      <!-- We can add more academic details like current semester, 
-                           courses enrolled, attendance summary, etc. in future updates -->
                     </div>
                     
                     <!-- Account Details Tab -->
@@ -295,18 +454,76 @@
                         </div>
                       <% } %>
                     </div>
+                    
+                    <!-- Unfreeze Requests Tab -->
+                    <% if (student.unfreeze_requests && student.unfreeze_requests.length > 0) { %>
+                      <div class="tab-pane" id="requests">
+                        <div class="table-responsive">
+                          <table class="table table-vcenter card-table">
+                            <thead>
+                              <tr>
+                                <th>Date</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Processed</th>
+                                <th>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <% student.unfreeze_requests.sort((a, b) => new Date(b.requested_at) - new Date(a.requested_at)).forEach(request => { %>
+                                <tr>
+                                  <td><%= new Date(request.requested_at).toLocaleDateString() %></td>
+                                  <td><%= request.reason %></td>
+                                  <td>
+                                    <% if (request.status === 'pending') { %>
+                                      <span class="badge bg-yellow">Pending</span>
+                                    <% } else if (request.status === 'approved') { %>
+                                      <span class="badge bg-green">Approved</span>
+                                    <% } else { %>
+                                      <span class="badge bg-red">Rejected</span>
+                                    <% } %>
+                                  </td>
+                                  <td>
+                                    <% if (request.processed_at) { %>
+                                      <%= new Date(request.processed_at).toLocaleDateString() %>
+                                    <% } else { %>
+                                      -
+                                    <% } %>
+                                  </td>
+                                  <td>
+                                    <% if (request.status === 'pending' && (user.role === 'admin' || user.role === 'principal' || user.role === 'hod')) { %>
+                                      <form action="/students/process-unfreeze-request/<%= student._id %>" method="POST" class="btn-list">
+                                        <input type="hidden" name="requestId" value="<%= request._id %>">
+                                        <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">
+                                          <i class="ti ti-check me-1"></i>
+                                          Approve
+                                        </button>
+                                        <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">
+                                          <i class="ti ti-x me-1"></i>
+                                          Reject
+                                        </button>
+                                      </form>
+                                    <% } else { %>
+                                      -
+                                    <% } %>
+                                  </td>
+                                </tr>
+                              <% }); %>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    <% } %>
                   </div>
                 </div>
               </div>
-              
-              <!-- Additional sections like attendance summary, fee status, exam results, etc. can be added here -->
             </div>
           </div>
         </div>
       </div>
       
       <!-- Reset Password Modal -->
-      <% if (student.user_id) { %>
+      <% if (student.user_id && (user.role === 'admin' || user.role === 'principal' || user.role === 'hod')) { %>
         <div class="modal modal-blur fade" id="modal-reset-password" tabindex="-1" role="dialog" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -334,30 +551,123 @@
       <% } %>
       
       <!-- Delete Modal -->
-      <div class="modal modal-blur fade" id="modal-delete" tabindex="-1" role="dialog" aria-hidden="true">
+      <% if (user.role === 'admin' || user.role === 'principal' || user.role === 'hod') { %>
+        <div class="modal modal-blur fade" id="modal-delete" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Delete Student</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you want to delete <strong><%= student.name %></strong>?</p>
+                <p class="text-danger">This action cannot be undone and will also delete the associated user account if it exists.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                  Cancel
+                </button>
+                <form action="/students/delete/<%= student._id %>" method="POST">
+                  <button type="submit" class="btn btn-danger ms-auto">
+                    Delete
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+      
+      <!-- Freeze Profile Modal -->
+      <div class="modal modal-blur fade" id="modal-freeze" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Delete Student</h5>
+              <h5 class="modal-title">Freeze Profile</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-              <p>Are you sure you want to delete <strong><%= student.name %></strong>?</p>
-              <p class="text-danger">This action cannot be undone and will also delete the associated user account if it exists.</p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
-                Cancel
-              </button>
-              <form action="/students/delete/<%= student._id %>" method="POST">
-                <button type="submit" class="btn btn-danger ms-auto">
-                  Delete
+            <form action="/students/freeze-profile/<%= student._id %>" method="POST">
+              <div class="modal-body">
+                <div class="mb-3">
+                  <p>Are you sure you want to freeze this profile?</p>
+                  <p>Once frozen, you will not be able to edit your profile information until it is unfrozen by an admin, principal, or HOD.</p>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                  Cancel
                 </button>
+                <button type="submit" class="btn btn-warning ms-auto">
+                  <i class="ti ti-lock me-1"></i>
+                  Freeze Profile
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Unfreeze Profile Modal (Admin) -->
+      <% if (user.role === 'admin' || user.role === 'principal' || user.role === 'hod') { %>
+        <div class="modal modal-blur fade" id="modal-unfreeze" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Unfreeze Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form action="/students/unfreeze-profile/<%= student._id %>" method="POST">
+                <div class="modal-body">
+                  <p>Are you sure you want to unfreeze the profile for <strong><%= student.name %></strong>?</p>
+                  <p>This will allow the student to edit their profile information.</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-success ms-auto">
+                    <i class="ti ti-lock-open me-1"></i>
+                    Unfreeze Profile
+                  </button>
+                </div>
               </form>
             </div>
           </div>
         </div>
-      </div>
+      <% } %>
+      
+      <!-- Unfreeze Request Modal (Student) -->
+       <!-- Unfreeze Request Modal (Student) -->
+      <% if (isOwnProfile && student.is_frozen) { %>
+        <div class="modal modal-blur fade" id="modal-unfreeze-request" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Request to Unfreeze Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form action="/students/request-unfreeze/<%= student._id %>" method="POST">
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label class="form-label required">Reason for Unfreeze Request</label>
+                    <textarea class="form-control" name="reason" rows="3" placeholder="Please provide a reason for your request to unfreeze your profile" required></textarea>
+                  </div>
+                  <p class="text-muted small">Your request will be reviewed by an administrator. You will be notified once it is processed.</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-primary ms-auto">
+                    <i class="ti ti-send me-1"></i>
+                    Submit Request
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% } %>
       
       <%- include('../partials/footer') %>
     </div>

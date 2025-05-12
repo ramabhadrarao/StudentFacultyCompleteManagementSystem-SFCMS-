@@ -1,0 +1,165 @@
+<!-- views/students/import-result.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head', { title: 'Import Results' }) %>
+<body>
+  <div class="page">
+    <%- include('../partials/navbar') %>
+    <%- include('../partials/sidebar') %>
+    
+    <div class="page-wrapper">
+      <div class="container-xl">
+        <div class="page-header d-print-none">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="page-title">Import Results</h2>
+            </div>
+            <div class="col-auto ms-auto">
+              <div class="btn-list">
+                <a href="/students" class="btn btn-outline-secondary d-none d-sm-inline-block me-2">
+                  <i class="ti ti-users"></i>
+                  Back to Students
+                </a>
+                <a href="/students/import" class="btn btn-primary d-none d-sm-inline-block">
+                  <i class="ti ti-file-import"></i>
+                  New Import
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="page-body">
+        <div class="container-xl">
+          <%- include('../partials/messages') %>
+          
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Import Summary</h3>
+            </div>
+            <div class="card-body">
+              <div class="row row-cards row-deck mb-4">
+                <div class="col-sm-6 col-lg-3">
+                  <div class="card">
+                    <div class="card-body p-2 text-center">
+                      <div class="text-right text-green">
+                        <i class="ti ti-users"></i>
+                      </div>
+                      <div class="h1 m-0"><%= results.total %></div>
+                      <div class="text-muted mb-3">Total Records</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                  <div class="card">
+                    <div class="card-body p-2 text-center">
+                      <div class="text-right text-green">
+                        <i class="ti ti-check"></i>
+                      </div>
+                      <div class="h1 m-0"><%= results.success.length %></div>
+                      <div class="text-muted mb-3">Successfully Imported</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                  <div class="card">
+                    <div class="card-body p-2 text-center">
+                      <div class="text-right text-red">
+                        <i class="ti ti-alert-triangle"></i>
+                      </div>
+                      <div class="h1 m-0"><%= results.errors.length %></div>
+                      <div class="text-muted mb-3">Failed Records</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                  <div class="card">
+                    <div class="card-body p-2 text-center">
+                      <div class="text-right text-yellow">
+                        <i class="ti ti-users"></i>
+                      </div>
+                      <div class="h1 m-0"><%= Math.round((results.success.length / results.total) * 100) %>%</div>
+                      <div class="text-muted mb-3">Success Rate</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <% if (results.success.length > 0) { %>
+                <div class="card mb-4">
+                  <div class="card-header">
+                    <h4 class="card-title">
+                      <i class="ti ti-check-circle text-green me-2"></i>
+                      Successfully Imported Students
+                    </h4>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-vcenter card-table">
+                      <thead>
+                        <tr>
+                          <th>Admission No</th>
+                          <th>Name</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% results.success.forEach(student => { %>
+                          <tr>
+                            <td><%= student.admission_no %></td>
+                            <td><%= student.name %></td>
+                            <td>
+                              <a href="/students/view/<%= student._id %>" class="btn btn-sm btn-primary">
+                                <i class="ti ti-eye me-1"></i> View
+                              </a>
+                            </td>
+                          </tr>
+                        <% }) %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              <% } %>
+              
+              <% if (results.errors.length > 0) { %>
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">
+                      <i class="ti ti-alert-circle text-danger me-2"></i>
+                      Failed Records
+                    </h4>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-vcenter card-table">
+                      <thead>
+                        <tr>
+                          <th>Row Data</th>
+                          <th>Error</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% results.errors.forEach(error => { %>
+                          <tr>
+                            <td>
+                              <pre class="mb-0"><%= error.row %></pre>
+                            </td>
+                            <td class="text-danger"><%= error.error %></td>
+                          </tr>
+                        <% }) %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <%- include('../partials/footer') %>
+    </div>
+  </div>
+  
+  <%- include('../partials/scripts') %>
+</body>
+</html>
