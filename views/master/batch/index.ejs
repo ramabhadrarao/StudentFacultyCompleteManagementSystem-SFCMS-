@@ -1,12 +1,444 @@
-<%- include('../../master/generic-index', { 
-      title: 'Batch Management',
-      modelName: 'batch',
-      displayName: 'Batch',
-      items: items || [],
-      listFields: listFields || ['name'],
-      requiredFields: requiredFields || ['name'],
-      relatedModels: relatedModels || [],
-      relatedData: relatedData || {},
-      searchTerm: searchTerm || '',
-      pagination: pagination || { page: 1, limit: 10, total: 0, pages: 0 }
-    }) %>
+<!-- views/master/batch/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../../partials/head', { title: 'Batch Management' }) %>
+<body>
+  <div class="page">
+    <%- include('../../partials/navbar') %>
+    <%- include('../../partials/sidebar') %>
+    
+    <div class="page-wrapper">
+      <div class="container-xl">
+        <div class="page-header d-print-none">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="page-title">Batch Management</h2>
+            </div>
+            <div class="col-auto ms-auto">
+              <div class="btn-list">
+                <button type="button" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-add">
+                  <i class="ti ti-plus"></i>
+                  Add Batch
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="page-body">
+        <div class="container-xl">
+          <%- include('../../partials/messages') %>
+          
+          <!-- Filter panel -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <form action="/master/batch" method="GET" class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label">Search</label>
+                  <div class="input-icon">
+                    <input type="text" class="form-control" name="search" value="<%= searchTerm || '' %>" placeholder="Search...">
+                    <span class="input-icon-addon">
+                      <i class="ti ti-search"></i>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                  <button type="submit" class="btn btn-primary w-100">
+                    <i class="ti ti-search me-1"></i>
+                    Search
+                  </button>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                  <a href="/master/batch" class="btn btn-outline-secondary w-100">
+                    <i class="ti ti-refresh me-1"></i>
+                    Reset
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+          
+          <!-- Data table -->
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-vcenter table-hover card-table">
+                  <thead>
+                    <tr>
+                      <th>Batch Name</th>
+                      <th>Start Year</th>
+                      <th>End Year</th>
+                      <th>Program</th>
+                      <th>Branch</th>
+                      <th class="w-1">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (!items || items.length === 0) { %>
+                      <tr>
+                        <td colspan="6" class="text-center">No batches found</td>
+                      </tr>
+                    <% } else { %>
+                      <% items.forEach(item => { %>
+                        <tr>
+                          <td><%= item.batch_name %></td>
+                          <td><%= item.start_year %></td>
+                          <td><%= item.end_year %></td>
+                          <td>
+                            <% if (item.program_id) { %>
+                              <% if (typeof item.program_id === 'object' && item.program_id.program_name) { %>
+                                <%= item.program_id.program_name %>
+                              <% } else { %>
+                                <%= item.program_id %>
+                              <% } %>
+                            <% } else { %>
+                              -
+                            <% } %>
+                          </td>
+                          <td>
+                            <% if (item.branch_id) { %>
+                              <% if (typeof item.branch_id === 'object' && item.branch_id.branch_name) { %>
+                                <%= item.branch_id.branch_name %>
+                              <% } else { %>
+                                <span class="text-muted">ID: <%= item.branch_id %></span>
+                              <% } %>
+                            <% } else { %>
+                              -
+                            <% } %>
+                          </td>
+                          <td>
+                            <div class="btn-list flex-nowrap">
+                              <button type="button" class="btn btn-sm btn-primary edit-btn"
+                                      data-id="<%= item._id %>"
+                                      data-batch_name="<%= item.batch_name %>"
+                                      data-start_year="<%= item.start_year %>"
+                                      data-end_year="<%= item.end_year %>"
+                                      data-program_id="<%= item.program_id && item.program_id._id ? item.program_id._id : item.program_id %>"
+                                      data-branch_id="<%= item.branch_id && item.branch_id._id ? item.branch_id._id : item.branch_id %>"
+                                      data-bs-toggle="modal" data-bs-target="#modal-edit">
+                                <i class="ti ti-edit"></i>
+                              </button>
+                              <button type="button" class="btn btn-sm btn-danger delete-btn"
+                                      data-id="<%= item._id %>"
+                                      data-name="<%= item.batch_name %>"
+                                      data-bs-toggle="modal" data-bs-target="#modal-delete">
+                                <i class="ti ti-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Pagination -->
+              <% if (pagination && pagination.pages > 1) { %>
+                <div class="mt-3 d-flex justify-content-center">
+                  <ul class="pagination">
+                    <% if (pagination.page > 1) { %>
+                      <li class="page-item">
+                        <a class="page-link" href="/master/batch?page=<%= pagination.page - 1 %><%= searchTerm ? '&search=' + searchTerm : '' %>">
+                          <i class="ti ti-chevron-left"></i>
+                          Prev
+                        </a>
+                      </li>
+                    <% } else { %>
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#">
+                          <i class="ti ti-chevron-left"></i>
+                          Prev
+                        </a>
+                      </li>
+                    <% } %>
+                    
+                    <% for (let i = 1; i <= pagination.pages; i++) { %>
+                      <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+                        <a class="page-link" href="/master/batch?page=<%= i %><%= searchTerm ? '&search=' + searchTerm : '' %>"><%= i %></a>
+                      </li>
+                    <% } %>
+                    
+                    <% if (pagination.page < pagination.pages) { %>
+                      <li class="page-item">
+                        <a class="page-link" href="/master/batch?page=<%= pagination.page + 1 %><%= searchTerm ? '&search=' + searchTerm : '' %>">
+                          Next
+                          <i class="ti ti-chevron-right"></i>
+                        </a>
+                      </li>
+                    <% } else { %>
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#">
+                          Next
+                          <i class="ti ti-chevron-right"></i>
+                        </a>
+                      </li>
+                    <% } %>
+                  </ul>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <%- include('../../partials/footer') %>
+    </div>
+  </div>
+  
+  <!-- Add Modal -->
+   <!-- Add Modal -->
+<div class="modal modal-blur fade" id="modal-add" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Batch</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/master/batch" method="POST">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label required">Batch Name</label>
+            <input type="text" class="form-control" name="batch_name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label required">Start Year</label>
+            <input type="number" class="form-control" name="start_year" min="2000" max="2100" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label required">End Year</label>
+            <input type="number" class="form-control" name="end_year" min="2000" max="2100" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label required">Program</label>
+            <select class="form-select" name="program_id" id="program-select" required>
+              <option value="">Select Program</option>
+              <% if (relatedData && relatedData.program_id) { %>
+                <% relatedData.program_id.forEach(option => { %>
+                  <option value="<%= option._id %>"><%= option.program_name %></option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Branch</label>
+            <select class="form-select" name="branch_id" id="branch-select">
+              <option value="">Select Branch</option>
+              <% if (relatedData && relatedData.branch_id) { %>
+                <% relatedData.branch_id.forEach(option => { %>
+                  <option value="<%= option._id %>"><%= option.branch_name %></option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary ms-auto">
+            <i class="ti ti-plus me-1"></i>
+            Create Batch
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal modal-blur fade" id="modal-edit" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Batch</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="edit-form" action="/master/batch/update/" method="POST">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label required">Batch Name</label>
+            <input type="text" class="form-control" id="edit-batch_name" name="batch_name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label required">Start Year</label>
+            <input type="number" class="form-control" id="edit-start_year" name="start_year" min="2000" max="2100" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label required">End Year</label>
+            <input type="number" class="form-control" id="edit-end_year" name="end_year" min="2000" max="2100" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label required">Program</label>
+            <select class="form-select" id="edit-program_id" name="program_id" required>
+              <option value="">Select Program</option>
+              <% if (relatedData && relatedData.program_id) { %>
+                <% relatedData.program_id.forEach(option => { %>
+                  <option value="<%= option._id %>"><%= option.program_name %></option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Branch</label>
+            <select class="form-select" id="edit-branch_id" name="branch_id">
+              <option value="">Select Branch</option>
+              <% if (relatedData && relatedData.branch_id) { %>
+                <% relatedData.branch_id.forEach(option => { %>
+                  <option value="<%= option._id %>"><%= option.branch_name %></option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary ms-auto">
+            <i class="ti ti-check me-1"></i>
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal modal-blur fade" id="modal-delete" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Batch</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this batch: <strong id="delete-name"></strong>?</p>
+        <p class="text-danger">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <form id="delete-form" action="/master/batch/delete/" method="POST">
+          <button type="submit" class="btn btn-danger ms-auto">
+            <i class="ti ti-trash me-1"></i>
+            Delete Batch
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Include your modals here - same as in generic-index.ejs -->
+  
+  <%- include('../../partials/scripts') %>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Edit button click event
+      document.querySelectorAll('.edit-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          const form = document.getElementById('edit-form');
+          form.action = `/master/batch/update/${id}`;
+          
+          // Set form values
+          document.getElementById('edit-batch_name').value = this.getAttribute('data-batch_name') || '';
+          document.getElementById('edit-start_year').value = this.getAttribute('data-start_year') || '';
+          document.getElementById('edit-end_year').value = this.getAttribute('data-end_year') || '';
+          
+          const programId = this.getAttribute('data-program_id');
+          if (programId && document.getElementById('edit-program_id')) {
+            document.getElementById('edit-program_id').value = programId;
+            
+            // Also load the related branches for this program
+            loadBranchesForProgram(programId, 'edit-branch_id', this.getAttribute('data-branch_id'));
+          }
+          
+          const branchId = this.getAttribute('data-branch_id');
+          if (branchId && document.getElementById('edit-branch_id')) {
+            document.getElementById('edit-branch_id').value = branchId;
+          }
+        });
+      });
+      
+      // Delete button click event
+      document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          const name = this.getAttribute('data-name');
+          const form = document.getElementById('delete-form');
+          form.action = `/master/batch/delete/${id}`;
+          document.getElementById('delete-name').textContent = name;
+        });
+      });
+  
+      // Function to load branches for a given program ID
+      function loadBranchesForProgram(programId, selectElementId, selectedBranchId = null) {
+        const branchSelectElem = document.getElementById(selectElementId);
+        
+        if (!branchSelectElem) return;
+        
+        if (!programId) {
+          branchSelectElem.innerHTML = '<option value="">Select Branch</option>';
+          branchSelectElem.disabled = true;
+          return;
+        }
+        
+        // Fetch branches for selected program
+        fetch(`/api/branches/by-program/${programId}`)
+          .then(response => response.json())
+          .then(data => {
+            branchSelectElem.innerHTML = '<option value="">Select Branch</option>';
+            
+            if (data.success && data.branches && data.branches.length > 0) {
+              data.branches.forEach(branch => {
+                const option = document.createElement('option');
+                option.value = branch._id;
+                option.textContent = branch.branch_name;
+                
+                // If this is the selected branch, mark it as selected
+                if (selectedBranchId && branch._id === selectedBranchId) {
+                  option.selected = true;
+                }
+                
+                branchSelectElem.appendChild(option);
+              });
+              branchSelectElem.disabled = false;
+            } else {
+              branchSelectElem.innerHTML = '<option value="">No branches found</option>';
+              branchSelectElem.disabled = true;
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching branches:', error);
+            branchSelectElem.innerHTML = '<option value="">Error loading branches</option>';
+            branchSelectElem.disabled = true;
+          });
+      }
+      
+      // Program-Branch dependency
+      const programSelect = document.getElementById('program-select');
+      const branchSelect = document.getElementById('branch-select');
+      const editProgramSelect = document.getElementById('edit-program_id');
+      const editBranchSelect = document.getElementById('edit-branch_id');
+      
+      function setupProgramBranchDependency(programSelectElem, branchSelectElem) {
+        if (programSelectElem && branchSelectElem) {
+          programSelectElem.addEventListener('change', function() {
+            const programId = this.value;
+            loadBranchesForProgram(programId, branchSelectElem.id);
+          });
+        }
+      }
+      
+      // Setup dependencies for both add and edit forms
+      setupProgramBranchDependency(programSelect, branchSelect);
+      setupProgramBranchDependency(editProgramSelect, editBranchSelect);
+    });
+  </script>
+</body>
+</html>

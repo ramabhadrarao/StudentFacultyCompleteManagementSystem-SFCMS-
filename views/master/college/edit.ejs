@@ -1,0 +1,338 @@
+<!-- views/master/college/edit.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../../partials/head', { title: 'Edit College' }) %>
+<body>
+  <div class="page">
+    <%- include('../../partials/navbar') %>
+    <%- include('../../partials/sidebar') %>
+    
+    <div class="page-wrapper">
+      <div class="container-xl">
+        <div class="page-header d-print-none">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="page-title">Edit College</h2>
+            </div>
+            <div class="col-auto ms-auto">
+              <div class="btn-list">
+                <a href="/master/college" class="btn btn-outline-secondary d-none d-sm-inline-block">
+                  <i class="ti ti-arrow-left"></i>
+                  Back to Colleges
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="page-body">
+        <div class="container-xl">
+          <%- include('../../partials/messages') %>
+          
+          <form action="/master/college/edit/<%= college._id %>" method="POST" enctype="multipart/form-data">
+            <div class="row">
+              <!-- Basic Information Card -->
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header">
+                    <h3 class="card-title">Basic Information</h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label class="form-label required">College Name</label>
+                      <input type="text" class="form-control" name="name" value="<%= college.name %>" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label class="form-label required">College Code</label>
+                      <input type="text" class="form-control" name="college_code" value="<%= college.college_code %>" required>
+                      <div class="form-hint">Unique identifier code for the college</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label class="form-label">Principal's Name</label>
+                      <input type="text" class="form-control" name="principal_name" value="<%= college.principal_name || '' %>">
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label class="form-label">Establishment Year</label>
+                      <input type="number" class="form-control" name="establishment_year" min="1800" max="<%= new Date().getFullYear() %>" value="<%= college.establishment_year || '' %>">
+                    </div>
+                    
+                    <div class="mb-3">
+                      <div class="form-label">Status</div>
+                      <label class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_active" value="true" <%= college.is_active ? 'checked' : '' %>>
+                        <span class="form-check-label">Active</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Contact and Logo Card -->
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header">
+                    <h3 class="card-title">Contact Information & Logo</h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label class="form-label">Email</label>
+                      <input type="email" class="form-control" name="contact_email" value="<%= college.contact && college.contact.email ? college.contact.email : '' %>">
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label class="form-label">Phone</label>
+                      <input type="text" class="form-control" name="contact_phone" value="<%= college.contact && college.contact.phone ? college.contact.phone : '' %>">
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label class="form-label">Website</label>
+                      <input type="url" class="form-control" name="contact_website" placeholder="https://example.com" value="<%= college.contact && college.contact.website ? college.contact.website : '' %>">
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label class="form-label">College Logo</label>
+                      <input type="file" class="form-control" name="logo" accept="image/jpeg,image/png,image/jpg">
+                      <% if (college.logo) { %>
+                        <div class="mt-2">
+                          <img src="/<%= college.logo %>" alt="College Logo" class="img-thumbnail" style="max-height: 100px;">
+                          <small class="text-muted">Current logo</small>
+                        </div>
+                      <% } %>
+                      <div class="form-hint">Upload a logo image (JPG, PNG, max 5MB)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Address Card -->
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header">
+                    <h3 class="card-title">Address</h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label class="form-label">Street Address</label>
+                      <input type="text" class="form-control" name="address_street" value="<%= college.address && college.address.street ? college.address.street : '' %>">
+                    </div>
+                    
+                    <div class="row">
+                      <div class="col-6 mb-3">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-control" name="address_city" value="<%= college.address && college.address.city ? college.address.city : '' %>">
+                      </div>
+                      
+                      <div class="col-6 mb-3">
+                        <label class="form-label">State/Province</label>
+                        <input type="text" class="form-control" name="address_state" value="<%= college.address && college.address.state ? college.address.state : '' %>">
+                      </div>
+                    </div>
+                    
+                    <div class="row">
+                      <div class="col-6 mb-3">
+                        <label class="form-label">Postal Code</label>
+                        <input type="text" class="form-control" name="address_pincode" value="<%= college.address && college.address.pincode ? college.address.pincode : '' %>">
+                      </div>
+                      
+                      <div class="col-6 mb-3">
+                        <label class="form-label">Country</label>
+                        <input type="text" class="form-control" name="address_country" value="<%= college.address && college.address.country ? college.address.country : 'India' %>">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Accreditation Card -->
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header">
+                    <h3 class="card-title">Accreditation</h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label class="form-label">Accreditation Type</label>
+                      <select class="form-select" name="accreditation">
+                        <% accreditations.forEach(accred => { %>
+                          <option value="<%= accred %>" <%= college.accreditation === accred ? 'selected' : '' %>><%= accred %></option>
+                        <% }) %>
+                      </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label class="form-label">Valid Till</label>
+                      <input type="date" class="form-control" name="accreditation_valid_till" 
+                        value="<%= college.accreditation_valid_till ? college.accreditation_valid_till.toISOString().split('T')[0] : '' %>">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Affiliations Card -->
+              <div class="col-12">
+                <div class="card mb-3">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">University Affiliations</h3>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="addAffiliation">
+                      <i class="ti ti-plus"></i> Add Affiliation
+                    </button>
+                  </div>
+                  <div class="card-body">
+                    <div id="affiliations-container">
+                      <% if (college.affiliations && college.affiliations.length > 0) { %>
+                        <% college.affiliations.forEach((affiliation, index) => { %>
+                          <div class="affiliation-item mb-3 border-bottom pb-3 position-relative">
+                            <% if (index > 0) { %>
+                              <button type="button" class="btn btn-sm btn-icon btn-danger position-absolute top-0 end-0 remove-affiliation">
+                                <i class="ti ti-x"></i>
+                              </button>
+                            <% } %>
+                            <div class="row">
+                              <div class="col-md-6 mb-3">
+                                <label class="form-label">University/Board</label>
+                                <input type="text" class="form-control" name="affiliation_university[]" value="<%= affiliation.university %>">
+                              </div>
+                              
+                              <div class="col-md-6 mb-3">
+                                <label class="form-label">Affiliation Number</label>
+                                <input type="text" class="form-control" name="affiliation_number[]" value="<%= affiliation.affiliation_number || '' %>">
+                              </div>
+                            </div>
+                            
+                            <div class="row">
+                              <div class="col-md-6 mb-3">
+                                <label class="form-label">Valid From</label>
+                                <input type="date" class="form-control" name="affiliation_valid_from[]" 
+                                  value="<%= affiliation.valid_from ? affiliation.valid_from.toISOString().split('T')[0] : '' %>">
+                              </div>
+                              
+                              <div class="col-md-6 mb-3">
+                                <label class="form-label">Valid Till</label>
+                                <input type="date" class="form-control" name="affiliation_valid_till[]" 
+                                  value="<%= affiliation.valid_till ? affiliation.valid_till.toISOString().split('T')[0] : '' %>">
+                              </div>
+                            </div>
+                          </div>
+                        <% }) %>
+                      <% } else { %>
+                        <div class="affiliation-item mb-3 border-bottom pb-3">
+                          <div class="row">
+                            <div class="col-md-6 mb-3">
+                              <label class="form-label">University/Board</label>
+                              <input type="text" class="form-control" name="affiliation_university[]">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                              <label class="form-label">Affiliation Number</label>
+                              <input type="text" class="form-control" name="affiliation_number[]">
+                            </div>
+                          </div>
+                          
+                          <div class="row">
+                            <div class="col-md-6 mb-3">
+                              <label class="form-label">Valid From</label>
+                              <input type="date" class="form-control" name="affiliation_valid_from[]">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                              <label class="form-label">Valid Till</label>
+                              <input type="date" class="form-control" name="affiliation_valid_till[]">
+                            </div>
+                          </div>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-12 text-end">
+                <div class="btn-list">
+                  <a href="/master/college" class="btn btn-link">Cancel</a>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-device-floppy me-1"></i>
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <%- include('../../partials/footer') %>
+    </div>
+  </div>
+  
+  <%- include('../../partials/scripts') %>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add affiliation functionality
+      const addAffiliationBtn = document.getElementById('addAffiliation');
+      const affiliationsContainer = document.getElementById('affiliations-container');
+      
+      if (addAffiliationBtn && affiliationsContainer) {
+        addAffiliationBtn.addEventListener('click', function() {
+          const affiliationItem = document.createElement('div');
+          affiliationItem.className = 'affiliation-item mb-3 border-bottom pb-3 position-relative';
+          
+          affiliationItem.innerHTML = `
+            <button type="button" class="btn btn-sm btn-icon btn-danger position-absolute top-0 end-0 remove-affiliation">
+              <i class="ti ti-x"></i>
+            </button>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">University/Board</label>
+                <input type="text" class="form-control" name="affiliation_university[]">
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Affiliation Number</label>
+                <input type="text" class="form-control" name="affiliation_number[]">
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Valid From</label>
+                <input type="date" class="form-control" name="affiliation_valid_from[]">
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Valid Till</label>
+                <input type="date" class="form-control" name="affiliation_valid_till[]">
+              </div>
+            </div>
+          `;
+          
+          affiliationsContainer.appendChild(affiliationItem);
+          
+          // Setup remove button
+          const removeBtn = affiliationItem.querySelector('.remove-affiliation');
+          if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+              affiliationsContainer.removeChild(affiliationItem);
+            });
+          }
+        });
+      }
+      
+      // Setup existing remove affiliation buttons
+      const removeAffiliationBtns = document.querySelectorAll('.remove-affiliation');
+      removeAffiliationBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const affiliationItem = this.closest('.affiliation-item');
+          if (affiliationItem && affiliationsContainer) {
+            affiliationsContainer.removeChild(affiliationItem);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

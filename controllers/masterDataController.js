@@ -10,6 +10,7 @@ const Program = require('../models/Program');
 const Department = require('../models/Department');
 const College = require('../models/College'); 
 const Branch = require('../models/Branch');
+
 const Course = require('../models/Course');
 /**
  * Common methods for CRUD operations on master data models
@@ -304,6 +305,7 @@ exports.programController = createCrudMethods(Program, {
 });
 
 // Branch Controller
+// Add this to your controllers/masterDataController.js file
 exports.branchController = createCrudMethods(Branch, {
   displayName: 'Branch',
   searchFields: ['branch_name', 'branch_code'],
@@ -312,15 +314,5 @@ exports.branchController = createCrudMethods(Branch, {
     'program_id': Program,
     'department_id': Department
   },
-  listFields: ['branch_name', 'branch_code', 'program_id', 'department_id'],
-  hasMany: {
-    'Batches': {
-      model: Batch,
-      field: 'branch_id'
-    },
-    'Courses': {
-      model: Course,
-      field: 'branch_id'
-    }
-  }
+  listFields: ['branch_name', 'branch_code', 'program_id', 'department_id']
 });
