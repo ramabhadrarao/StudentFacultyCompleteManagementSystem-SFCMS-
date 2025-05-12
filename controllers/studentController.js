@@ -60,7 +60,15 @@ exports.getStudents = async (req, res) => {
     // Get batches for filter dropdown
     const batches = await Batch.find().sort({ start_year: -1 });
     const studentTypes = await StudentType.find().sort({ name: 1 });
-    
+    const queryParams = [];
+if (req.query.batch) queryParams.push(`batch=${req.query.batch}`);
+if (req.query.name) queryParams.push(`name=${req.query.name}`);
+if (req.query.admission_no) queryParams.push(`admission_no=${req.query.admission_no}`);
+if (req.query.student_type) queryParams.push(`student_type=${req.query.student_type}`);
+if (req.query.is_frozen) queryParams.push(`is_frozen=${req.query.is_frozen}`);
+
+const searchQuery = queryParams.length ? `?${queryParams.join('&')}` : '';
+
     res.render('students/index', {
       title: 'Student Management',
       students,
@@ -76,7 +84,8 @@ exports.getStudents = async (req, res) => {
         limit,
         total,
         pages: Math.ceil(total / limit)
-      }
+      },
+       searchQuery 
     });
   } catch (err) {
     console.error('Error fetching students:', err);
