@@ -1,4 +1,4 @@
-// routes/students.js
+// Enhanced student routes configuration
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -66,6 +66,9 @@ const csvUpload = multer({
 // Apply authentication middleware to all routes
 router.use(isAuthenticated);
 
+// Student Dashboard - available to students for self-management
+router.get('/dashboard', hasRole(['student']), studentController.dashboard);
+
 // Routes accessible by admin, principal, hod, and faculty
 router.get('/', hasRole(['admin', 'principal', 'hod', 'faculty']), studentController.getStudents);
 router.get('/view/:id', studentController.getStudentById); // Both students and staff can view, controller handles permissions
@@ -92,8 +95,7 @@ router.get('/export', hasRole(adminRoles), studentController.exportStudents);
 // Freeze/Unfreeze Profile Routes
 router.post('/freeze-profile/:id', studentController.freezeProfile); // Both students and staff can freeze, controller handles permissions
 router.post('/unfreeze-profile/:id', hasRole(adminRoles), studentController.unfreezeProfile);
-router.post('/request-unfreeze/:id', studentController.requestUnfreeze);
+router.post('/request-unfreeze/:id', hasRole(['student']), studentController.requestUnfreeze);
 router.post('/process-unfreeze-request/:id', hasRole(adminRoles), studentController.processUnfreezeRequest);
-router.get('/dashboard', hasRole(['student']), studentController.dashboard);
 
 module.exports = router;

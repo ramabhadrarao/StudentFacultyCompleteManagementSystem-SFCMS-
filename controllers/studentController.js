@@ -1537,6 +1537,7 @@ exports.processUnfreezeRequest = async (req, res) => {
 // Add this to controllers/studentController.js
 
 // Student Dashboard (for self-management)
+// Enhanced Student Dashboard Controller Function
 exports.dashboard = async (req, res) => {
   try {
     // Find student linked to the current user
@@ -1556,9 +1557,117 @@ exports.dashboard = async (req, res) => {
       return res.redirect('/dashboard');
     }
     
+    // Get attendance summary if available
+    let attendanceSummary = null;
+    try {
+      // This is a placeholder - you would need to implement the actual attendance retrieval
+      // based on your attendance model/schema
+      const EnhancedAttendance = mongoose.model('EnhancedAttendance');
+      const attendanceData = await EnhancedAttendance.find({
+        student_id: student._id
+      })
+      .populate('course_id')
+      .sort({ attendance_date: -1 })
+      .limit(100); // Get the most recent 100 attendance records
+      
+      // Process attendance data to get course-wise percentages
+      const courseAttendance = {};
+      
+      attendanceData.forEach(record => {
+        const courseId = record.course_id._id.toString();
+        
+        if (!courseAttendance[courseId]) {
+          courseAttendance[courseId] = {
+            course: record.course_id.course_name || 'Unknown Course',
+            total: 0,
+            present: 0,
+            percentage: 0
+          };
+        }
+        
+        courseAttendance[courseId].total++;
+        
+        if (record.status === 'Present') {
+          courseAttendance[courseId].present++;
+        }
+      });
+      
+      // Calculate percentages
+      Object.values(courseAttendance).forEach(course => {
+        course.percentage = Math.round((course.present / course.total) * 100);
+      });
+      
+      attendanceSummary = {
+        courseAttendance: Object.values(courseAttendance),
+        overallAttendance: Math.round(
+          Object.values(courseAttendance).reduce((sum, course) => sum + course.present, 0) / 
+          Object.values(courseAttendance).reduce((sum, course) => sum + course.total, 0) * 100
+        ) || 0
+      };
+    } catch (err) {
+      console.log('Attendance data not available or error retrieving it:', err.message);
+      // We'll continue without attendance data
+    }
+    
+    // Get upcoming classes if timetable is available
+    let upcomingClasses = null;
+    try {
+      // This is a placeholder - implement based on your timetable model
+      const Timetable = mongoose.model('Timetable');
+      const today = new Date();
+      const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      upcomingClasses = await Timetable.find({
+        batch_id: student.batch_id,
+        day_of_week: dayOfWeek
+      })
+      .populate('course_id')
+      .populate('faculty_id')
+      .sort({ start_time: 1 });
+    } catch (err) {
+      console.log('Timetable data not available or error retrieving it:', err.message);
+      // We'll continue without timetable data
+    }
+    
+    // Check for pending unfreeze requests
+    const pendingUnfreezeRequest = student.unfreeze_requests && 
+                                  student.unfreeze_requests.find(req => req.status === 'pending');
+    
+    // Calculate profile completeness
+    const requiredFields = [
+      'name', 'email', 'mobile', 'father_name', 'mother_name', 'address', 'aadhar'
+    ];
+    
+    let completedFields = 0;
+    const missingFields = [];
+    
+    requiredFields.forEach(field => {
+      if (student[field] && student[field].toString().trim() !== '') {
+        completedFields++;
+      } else {
+        // Format field name for display (e.g. 'father_name' -> 'Father Name')
+        const formattedField = field
+          .split('_')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        
+        missingFields.push(formattedField);
+      }
+    });
+    
+    const profileCompleteness = {
+      percentage: Math.round((completedFields / requiredFields.length) * 100),
+      missingFields
+    };
+    
+    // Render the dashboard view with all this data
     res.render('students/dashboard', {
       title: 'Student Dashboard',
       student,
+      attendanceSummary,
+      upcomingClasses,
+      pendingUnfreezeRequest,
+      profileCompleteness,
       isOwnProfile: true
     });
   } catch (err) {

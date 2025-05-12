@@ -1,4 +1,4 @@
-<!-- views/students/import-result.ejs -->
+<!-- views/students/import-result.ejs - Enhanced version -->
 <!DOCTYPE html>
 <html lang="en">
 <%- include('../partials/head', { title: 'Import Results' }) %>
@@ -79,7 +79,7 @@
                       <div class="text-right text-yellow">
                         <i class="ti ti-users"></i>
                       </div>
-                      <div class="h1 m-0"><%= Math.round((results.success.length / results.total) * 100) %>%</div>
+                      <div class="h1 m-0"><%= Math.round((results.success.length / results.total) * 100) || 0 %>%</div>
                       <div class="text-muted mb-3">Success Rate</div>
                     </div>
                   </div>
@@ -100,6 +100,7 @@
                         <tr>
                           <th>Admission No</th>
                           <th>Name</th>
+                          <th>Status</th>
                           <th>Action</th>
                         </tr>
                       </thead>
@@ -109,9 +110,59 @@
                             <td><%= student.admission_no %></td>
                             <td><%= student.name %></td>
                             <td>
+                              <% if (student.warnings && student.warnings.length > 0) { %>
+                                <span class="badge bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= student.warnings.join(', ') %>">
+                                  <i class="ti ti-alert-triangle me-1"></i>
+                                  Imported with warnings
+                                </span>
+                              <% } else { %>
+                                <span class="badge bg-success">
+                                  <i class="ti ti-check me-1"></i>
+                                  Successfully imported
+                                </span>
+                              <% } %>
+                            </td>
+                            <td>
                               <a href="/students/view/<%= student._id %>" class="btn btn-sm btn-primary">
                                 <i class="ti ti-eye me-1"></i> View
                               </a>
+                            </td>
+                          </tr>
+                        <% }) %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              <% } %>
+              
+              <% if (results.warnings && results.warnings.length > 0) { %>
+                <div class="card mb-4">
+                  <div class="card-header">
+                    <h4 class="card-title">
+                      <i class="ti ti-alert-circle text-warning me-2"></i>
+                      Warnings
+                    </h4>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-vcenter card-table">
+                      <thead>
+                        <tr>
+                          <th>Admission No</th>
+                          <th>Name</th>
+                          <th>Warnings</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% results.warnings.forEach(warning => { %>
+                          <tr>
+                            <td><%= warning.admission_no %></td>
+                            <td><%= warning.name %></td>
+                            <td>
+                              <ul class="mb-0 ps-3">
+                                <% warning.warnings.forEach(msg => { %>
+                                  <li><%= msg %></li>
+                                <% }) %>
+                              </ul>
                             </td>
                           </tr>
                         <% }) %>
@@ -129,28 +180,46 @@
                       Failed Records
                     </h4>
                   </div>
-                  <div class="table-responsive">
-                    <table class="table table-vcenter card-table">
-                      <thead>
-                        <tr>
-                          <th>Row Data</th>
-                          <th>Error</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <% results.errors.forEach(error => { %>
-                          <tr>
-                            <td>
-                              <pre class="mb-0"><%= error.row %></pre>
-                            </td>
-                            <td class="text-danger"><%= error.error %></td>
-                          </tr>
-                        <% }) %>
-                      </tbody>
-                    </table>
+                  <div class="accordion" id="error-accordion">
+                    <% results.errors.forEach((error, index) => { %>
+                      <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-error-<%= index %>">
+                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-error-<%= index %>" aria-expanded="false">
+                            <span class="text-danger me-2"><i class="ti ti-x-circle"></i></span>
+                            <strong><%= error.error %></strong>
+                          </button>
+                        </h2>
+                        <div id="collapse-error-<%= index %>" class="accordion-collapse collapse" data-bs-parent="#error-accordion">
+                          <div class="accordion-body">
+                            <div class="row">
+                              <div class="col-12">
+                                <div class="card">
+                                  <div class="card-header">
+                                    <h4 class="card-title">Row Data</h4>
+                                  </div>
+                                  <div class="card-body">
+                                    <pre class="language-json mb-0"><code><%= error.row %></code></pre>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    <% }) %>
                   </div>
                 </div>
               <% } %>
+            </div>
+            <div class="card-footer text-end">
+              <a href="/students/export" class="btn btn-outline-success me-2">
+                <i class="ti ti-file-export me-1"></i>
+                Export All Students
+              </a>
+              <a href="/students/import" class="btn btn-primary">
+                <i class="ti ti-file-import me-1"></i>
+                Import More Students
+              </a>
             </div>
           </div>
         </div>
@@ -161,5 +230,14 @@
   </div>
   
   <%- include('../partials/scripts') %>
+  <script>
+    // Enable tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+      });
+    });
+  </script>
 </body>
 </html>
