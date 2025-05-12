@@ -1,0 +1,12 @@
+<%- include('../../master/generic-index', { 
+    title: 'Branch Management',
+    modelName: 'branch',
+    displayName: 'Branch',
+    items: items || [],
+    listFields: listFields || ['branch_name', 'branch_code', 'program_id', 'department_id'],
+    requiredFields: requiredFields || ['branch_name', 'branch_code', 'program_id', 'department_id'],
+    relatedModels: relatedModels || ['program_id', 'department_id'],
+    relatedData: relatedData || {},
+    searchTerm: searchTerm || '',
+    pagination: pagination || { page: 1, limit: 10, total: 0, pages: 0 }
+  }) %>

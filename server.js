@@ -79,6 +79,7 @@ const adminSettingsRoutes = require('./routes/admin/settings');
 const studentRoutes = require('./routes/students');
 const masterRoutes = require('./routes/master');
 const masterCollegeRoutes = require('./routes/master/college');
+const apiDependenciesRoutes = require('./routes/api/dependencies');
 
 
 // Apply routes
@@ -91,6 +92,8 @@ app.use('/master', masterRoutes);
 app.use('/admin/roles', adminRolesRoutes);
 app.use('/admin/settings', adminSettingsRoutes);
 app.use('/master/college', masterCollegeRoutes);
+app.use('/api', apiDependenciesRoutes);
+
 
 // Home route
 app.get('/', (req, res) => {

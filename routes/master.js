@@ -73,4 +73,11 @@ router.post('/program/update/:id', masterDataController.programController.update
 router.post('/program/delete/:id', masterDataController.programController.delete);
 router.get('/program/:id', masterDataController.programController.getById);
 
+// Branch routes
+router.get('/branch', masterDataController.branchController.list);
+router.post('/branch', masterDataController.branchController.create);
+router.post('/branch/update/:id', masterDataController.branchController.update);
+router.post('/branch/delete/:id', masterDataController.branchController.delete);
+router.get('/branch/:id', masterDataController.branchController.getById);
+
 module.exports = router;

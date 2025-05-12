@@ -9,6 +9,8 @@ const SubCaste = require('../models/SubCaste');
 const Program = require('../models/Program');
 const Department = require('../models/Department');
 const College = require('../models/College'); 
+const Branch = require('../models/Branch');
+const Course = require('../models/Course');
 /**
  * Common methods for CRUD operations on master data models
  * @param {Object} model - The Mongoose model
@@ -299,4 +301,26 @@ exports.programController = createCrudMethods(Program, {
     'department_id': Department
   },
   listFields: ['program_name', 'program_code', 'department_id']
+});
+
+// Branch Controller
+exports.branchController = createCrudMethods(Branch, {
+  displayName: 'Branch',
+  searchFields: ['branch_name', 'branch_code'],
+  requiredFields: ['branch_name', 'branch_code', 'program_id', 'department_id'],
+  relatedModels: {
+    'program_id': Program,
+    'department_id': Department
+  },
+  listFields: ['branch_name', 'branch_code', 'program_id', 'department_id'],
+  hasMany: {
+    'Batches': {
+      model: Batch,
+      field: 'branch_id'
+    },
+    'Courses': {
+      model: Course,
+      field: 'branch_id'
+    }
+  }
 });
