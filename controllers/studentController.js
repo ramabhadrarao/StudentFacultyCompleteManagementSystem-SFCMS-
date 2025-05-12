@@ -863,6 +863,7 @@ exports.generateImportTemplate = async (req, res) => {
 };
 
 // Process CSV import
+// Enhanced importStudents method with better error handling and validation
 exports.importStudents = async (req, res) => {
   try {
     if (!req.file) {
@@ -903,206 +904,280 @@ exports.importStudents = async (req, res) => {
     // Initialize arrays for results
     const successList = [];
     const errorList = [];
+    const warningList = [];
     const rowsToProcess = [];
     
     // Read CSV file
     const filePath = req.file.path;
-    const fileStream = fs.createReadStream(filePath);
     
-    fileStream
-      .pipe(csv())
-      .on('data', (row) => {
-        rowsToProcess.push(row);
-      })
-      .on('end', async () => {
-        // Remove temporary file
-        fs.unlinkSync(filePath);
-        
-        // Process each row
-        for (const row of rowsToProcess) {
+    return new Promise((resolve, reject) => {
+      fs.createReadStream(filePath)
+        .pipe(csv())
+        .on('data', (row) => {
+          rowsToProcess.push(row);
+        })
+        .on('end', async () => {
           try {
-            // Validate required fields
-            if (!row.admission_no || !row.name || !row.gender || !row.batch || 
-                !row.nationality || !row.religion || !row.student_type) {
-              errorList.push({
-                row: JSON.stringify(row),
-                error: 'Missing required fields'
-              });
-              continue;
+            // Remove temporary file after reading
+            fs.unlinkSync(filePath);
+
+            // Validate CSV structure first
+            if (rowsToProcess.length ===
+0) {
+              req.flash('error', 'The uploaded CSV file is empty');
+              return res.redirect('/students/import');
+            }
+
+            // Check for required headers
+            const requiredHeaders = ['admission_no', 'name', 'gender', 'batch', 'nationality', 'religion', 'student_type'];
+            const headers = Object.keys(rowsToProcess[0]);
+            const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
+            
+            if (missingHeaders.length > 0) {
+              req.flash('error', `Missing required columns in CSV: ${missingHeaders.join(', ')}`);
+              return res.redirect('/students/import');
             }
             
-            // Check if student with admission number already exists
-            const existingStudent = await Student.findOne({ admission_no: row.admission_no });
-            if (existingStudent) {
-              errorList.push({
-                row: JSON.stringify(row),
-                error: `Student with admission number ${row.admission_no} already exists`
-              });
-              continue;
-            }
+            // Create transaction log for each row
+            let totalProcessed = 0;
+            const totalRows = rowsToProcess.length;
             
-            // Validate and map reference data
-            if (!genderMap.has(row.gender)) {
-              errorList.push({
-                row: JSON.stringify(row),
-                error: `Invalid gender: ${row.gender}`
-              });
-              continue;
-            }
+            console.log(`Starting import of ${totalRows} students...`);
             
-            if (!batchMap.has(row.batch)) {
-              errorList.push({
-                row: JSON.stringify(row),
-                error: `Invalid batch: ${row.batch}`
-              });
-              continue;
-            }
-            
-            if (!nationalityMap.has(row.nationality)) {
-              errorList.push({
-                row: JSON.stringify(row),
-                error: `Invalid nationality: ${row.nationality}`
-              });
-              continue;
-            }
-            
-            if (!religionMap.has(row.religion)) {
-              errorList.push({
-                row: JSON.stringify(row),
-                error: `Invalid religion: ${row.religion}`
-              });
-              continue;
-            }
-            
-            if (!studentTypeMap.has(row.student_type)) {
-              errorList.push({
-                row: JSON.stringify(row),
-                error: `Invalid student type: ${row.student_type}`
-              });
-              continue;
-            }
-            
-            let casteId = null;
-            if (row.caste) {
-              if (!casteMap.has(row.caste)) {
+            // Process each row
+            for (const row of rowsToProcess) {
+              try {
+                totalProcessed++;
+                console.log(`Processing row ${totalProcessed}/${totalRows}: ${row.admission_no} - ${row.name}`);
+                
+                // Skip empty rows
+                if (!row.admission_no && !row.name) {
+                  console.log('Skipping empty row');
+                  continue;
+                }
+                
+                // Validate required fields
+                if (!row.admission_no || !row.name || !row.gender || !row.batch || 
+                    !row.nationality || !row.religion || !row.student_type) {
+                  console.log('Missing required fields');
+                  errorList.push({
+                    row: JSON.stringify(row),
+                    error: 'Missing required fields: admission_no, name, gender, batch, nationality, religion, and student_type are required'
+                  });
+                  continue;
+                }
+                
+                // Check if student with admission number already exists
+                const existingStudent = await Student.findOne({ admission_no: row.admission_no });
+                if (existingStudent) {
+                  console.log(`Student with admission number ${row.admission_no} already exists`);
+                  errorList.push({
+                    row: JSON.stringify(row),
+                    error: `Student with admission number ${row.admission_no} already exists`
+                  });
+                  continue;
+                }
+                
+                // Check if email is provided and is unique
+                if (row.email) {
+                  const emailExists = await User.findOne({ email: row.email });
+                  if (emailExists) {
+                    console.log(`Email ${row.email} already in use`);
+                    errorList.push({
+                      row: JSON.stringify(row),
+                      error: `Email already in use: ${row.email}`
+                    });
+                    continue;
+                  }
+                }
+                
+                // Validate and map reference data
+                let warnings = [];
+                
+                // Gender validation
+                if (!genderMap.has(row.gender)) {
+                  console.log(`Invalid gender: ${row.gender}`);
+                  errorList.push({
+                    row: JSON.stringify(row),
+                    error: `Invalid gender: ${row.gender}`
+                  });
+                  continue;
+                }
+                
+                // Batch validation
+                if (!batchMap.has(row.batch)) {
+                  console.log(`Invalid batch: ${row.batch}`);
+                  errorList.push({
+                    row: JSON.stringify(row),
+                    error: `Invalid batch: ${row.batch}`
+                  });
+                  continue;
+                }
+                
+                // Nationality validation
+                if (!nationalityMap.has(row.nationality)) {
+                  console.log(`Invalid nationality: ${row.nationality}`);
+                  errorList.push({
+                    row: JSON.stringify(row),
+                    error: `Invalid nationality: ${row.nationality}`
+                  });
+                  continue;
+                }
+                
+                // Religion validation
+                if (!religionMap.has(row.religion)) {
+                  console.log(`Invalid religion: ${row.religion}`);
+                  errorList.push({
+                    row: JSON.stringify(row),
+                    error: `Invalid religion: ${row.religion}`
+                  });
+                  continue;
+                }
+                
+                // Student type validation
+                if (!studentTypeMap.has(row.student_type)) {
+                  console.log(`Invalid student type: ${row.student_type}`);
+                  errorList.push({
+                    row: JSON.stringify(row),
+                    error: `Invalid student type: ${row.student_type}`
+                  });
+                  continue;
+                }
+                
+                // Blood group validation (if provided)
+                let bloodGroupId = null;
+                if (row.blood_group) {
+                  if (!bloodGroupMap.has(row.blood_group)) {
+                    warnings.push(`Unknown blood group: ${row.blood_group}. This field will be left empty.`);
+                  } else {
+                    bloodGroupId = bloodGroupMap.get(row.blood_group);
+                  }
+                }
+                
+                // Caste and subcaste validation
+                let casteId = null;
+                let subcasteId = null;
+                
+                if (row.caste) {
+                  if (!casteMap.has(row.caste)) {
+                    warnings.push(`Unknown caste: ${row.caste}. This field will be left empty.`);
+                  } else {
+                    casteId = casteMap.get(row.caste);
+                    
+                    // Check subcaste if provided
+                    if (row.sub_caste && casteId) {
+                      const casteSubcastes = subcasteMap.get(casteId.toString()) || [];
+                      const subcaste = casteSubcastes.find(sc => sc.name === row.sub_caste);
+                      
+                      if (!subcaste) {
+                        warnings.push(`Unknown sub caste: ${row.sub_caste} for caste: ${row.caste}. This field will be left empty.`);
+                      } else {
+                        subcasteId = subcaste._id;
+                      }
+                    }
+                  }
+                }
+                
+                // Create user account if email is provided
+                let userId = null;
+                if (row.email) {
+                  // Create user with default password (admission number)
+                  const user = new User({
+                    username: row.email.split('@')[0], // Use part before @ as username
+                    email: row.email,
+                    password_hash: await bcrypt.hash(row.admission_no, 10), // Use admission_no as default password
+                    role: 'student',
+                    is_active: true
+                  });
+                  
+                  await user.save();
+                  userId = user._id;
+                  console.log(`Created user account with ID ${userId} for ${row.name}`);
+                }
+                
+                // Create student
+                const student = new Student({
+                  admission_no: row.admission_no,
+                  regd_no: row.regd_no || '',
+                  name: row.name,
+                  gender_id: genderMap.get(row.gender),
+                  blood_group_id: bloodGroupId,
+                  email: row.email || '',
+                  mobile: row.mobile || '',
+                  father_name: row.father_name || '',
+                  mother_name: row.mother_name || '',
+                  father_mobile: row.father_mobile || '',
+                  mother_mobile: row.mother_mobile || '',
+                  aadhar: row.aadhar || '',
+                  father_aadhar: row.father_aadhar || '',
+                  mother_aadhar: row.mother_aadhar || '',
+                  address: row.address || '',
+                  batch_id: batchMap.get(row.batch),
+                  user_id: userId,
+                  nationality_id: nationalityMap.get(row.nationality),
+                  religion_id: religionMap.get(row.religion),
+                  student_type_id: studentTypeMap.get(row.student_type),
+                  caste_id: casteId,
+                  sub_caste_id: subcasteId,
+                  is_frozen: false
+                });
+                
+                await student.save();
+                
+                // Add to success list with warnings if any
+                successList.push({
+                  _id: student._id,
+                  admission_no: student.admission_no,
+                  name: student.name,
+                  warnings: warnings.length > 0 ? warnings : null
+                });
+                
+                if (warnings.length > 0) {
+                  warningList.push({
+                    admission_no: student.admission_no,
+                    name: student.name,
+                    warnings
+                  });
+                }
+              } catch (err) {
+                console.error(`Error processing row: ${err.message}`);
                 errorList.push({
                   row: JSON.stringify(row),
-                  error: `Invalid caste: ${row.caste}`
+                  error: err.message
                 });
-                continue;
               }
-              casteId = casteMap.get(row.caste);
             }
             
-            let subcasteId = null;
-            if (row.sub_caste && casteId) {
-              // Find the subcaste in the right caste
-              const casteSubcastes = subcasteMap.get(casteId.toString()) || [];
-              const subcaste = casteSubcastes.find(sc => sc.name === row.sub_caste);
-              
-              if (!subcaste) {
-                errorList.push({
-                  row: JSON.stringify(row),
-                  error: `Invalid sub caste: ${row.sub_caste} for caste: ${row.caste}`
-                });
-                continue;
-              }
-              
-              subcasteId = subcaste._id;
+            // Store results in session
+            req.session.importResults = {
+              total: rowsToProcess.length,
+              success: successList,
+              errors: errorList,
+              warnings: warningList
+            };
+            
+            if (errorList.length > 0) {
+              req.flash('warning', `Import completed with ${errorList.length} errors and ${successList.length} successful imports`);
+            } else {
+              req.flash('success', `Successfully imported ${successList.length} students`);
             }
             
-            let bloodGroupId = null;
-            if (row.blood_group) {
-              if (!bloodGroupMap.has(row.blood_group)) {
-                errorList.push({
-                  row: JSON.stringify(row),
-                  error: `Invalid blood group: ${row.blood_group}`
-                });
-                continue;
-              }
-              bloodGroupId = bloodGroupMap.get(row.blood_group);
-            }
-            
-            // Create user account if email is provided
-            let userId = null;
-            if (row.email) {
-              // Check if email already exists
-              const emailExists = await User.findOne({ email: row.email });
-              if (emailExists) {
-                errorList.push({
-                  row: JSON.stringify(row),
-                  error: `Email already in use: ${row.email}`
-                });
-                continue;
-              }
-              
-              // Create user with default password (admission number)
-              const user = new User({
-                username: row.email.split('@')[0], // Use part before @ as username
-                email: row.email,
-                password_hash: await bcrypt.hash(row.admission_no, 10), // Use admission_no as default password
-                role: 'student',
-                is_active: true
-              });
-              
-              await user.save();
-              userId = user._id;
-            }
-            
-            // Create student
-            const student = new Student({
-              admission_no: row.admission_no,
-              regd_no: row.regd_no,
-              name: row.name,
-              gender_id: genderMap.get(row.gender),
-              blood_group_id: bloodGroupId,
-              email: row.email,
-              mobile: row.mobile,
-              father_name: row.father_name,
-              mother_name: row.mother_name,
-              father_mobile: row.father_mobile,
-              mother_mobile: row.mother_mobile,
-              aadhar: row.aadhar,
-              father_aadhar: row.father_aadhar,
-              mother_aadhar: row.mother_aadhar,
-              address: row.address,
-              batch_id: batchMap.get(row.batch),
-              user_id: userId,
-              nationality_id: nationalityMap.get(row.nationality),
-              religion_id: religionMap.get(row.religion),
-              student_type_id: studentTypeMap.get(row.student_type),
-              caste_id: casteId,
-              sub_caste_id: subcasteId,
-              is_frozen: false
-            });
-            
-            await student.save();
-            
-            successList.push({
-              admission_no: row.admission_no,
-              name: row.name
-            });
+            res.redirect('/students/import/result');
           } catch (err) {
-            console.error('Error processing row:', err);
-            errorList.push({
-              row: JSON.stringify(row),
-              error: err.message
-            });
+            console.error('Error processing CSV:', err);
+            req.flash('error', `Error processing CSV: ${err.message}`);
+            res.redirect('/students/import');
           }
-        }
-        
-        // Store results in session for the result page
-        req.session.importResults = {
-          total: rowsToProcess.length,
-          success: successList,
-          errors: errorList
-        };
-        
-        res.redirect('/students/import/result');
-      });
+        })
+        .on('error', (err) => {
+          console.error('CSV parsing error:', err);
+          req.flash('error', `Error parsing CSV: ${err.message}`);
+          res.redirect('/students/import');
+        });
+    });
   } catch (err) {
-    console.error('Error importing students:', err);
-    req.flash('error', 'Failed to import students');
+    console.error('Import students error:', err);
+    req.flash('error', `Failed to import students: ${err.message}`);
     res.redirect('/students/import');
   }
 };
